@@ -7,8 +7,21 @@
 - 렐릭별 보상과 정제 단계(Intact/Exceptional/Flawless/Radiant) 확률
 - 한글/영어 검색, 렐릭 칩을 누르면 해당 렐릭으로 이동
 
-`fetch`를 쓰기 때문에 파일을 더블클릭하지 말고 웹 서버로 여세요.
-(GitHub Pages, 또는 저장소 폴더에서 `python3 -m http.server` 실행 후 http://localhost:8000/warframe/)
+## 2단계: 플래티넘 시세 (warframe.market)
+- 카드의 **시세** 버튼을 누르면 부품/세트의 최저 판매가(접속 중 판매자)를 불러옵니다. 마우스를 올리면 최고 구매가.
+- 검색 결과가 2개 이하면 자동으로 불러옵니다. 결과는 브라우저에 10분간 저장됩니다.
+- 렐릭 카드는 정제 단계별 **기대값**(Σ 확률 × 최저 판매가)을 보여줍니다. 포르마 등 프라임 부품이 아닌 보상은 제외.
+
+## 실행
+`fetch`를 쓰기 때문에 파일을 더블클릭하지 말고 웹 서버로 여세요. 권장 방법:
+
+```bash
+python3 warframe/tools/server.py
+# -> http://localhost:8000/warframe/
+```
+
+`server.py`는 페이지를 열어주면서 `/wfm/*` 요청을 warframe.market API로 대신 전달합니다.
+GitHub Pages 등 다른 곳에서 열면 warframe.market을 직접 호출하는데, 브라우저 보안 정책(CORS) 때문에 막히면 시세가 ⚠로 표시됩니다.
 
 ## 데이터 갱신
 데이터 출처: [WFCD/warframe-items](https://github.com/WFCD/warframe-items) (MIT)

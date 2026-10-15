@@ -17,7 +17,7 @@
         .tabs button.on { border-color: var(--accent); color: var(--accent); }
         input[type=search] { flex: 1; min-width: 200px; padding: 8px 12px; background: var(--card); color: var(--text); border: 1px solid var(--line); border-radius: 6px; font-size: 15px; }
         label { color: var(--sub); font-size: 14px; align-self: center; }
-        main { padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+        main { padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 12px; }
         .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
         .head { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
         .head img { width: 48px; height: 48px; object-fit: contain; }
@@ -28,12 +28,13 @@
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { padding: 4px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
         th { color: var(--sub); font-weight: normal; }
-        td.n, td:first-child { white-space: nowrap; }
+        th, td.n, td.nw { white-space: nowrap; }
         td.n { text-align: right; }
         .chip { display: inline-block; margin: 1px; padding: 1px 6px; border-radius: 4px; background: var(--bg); cursor: pointer; font-size: 12px; }
         .Common { color: var(--common); } .Uncommon { color: var(--uncommon); } .Rare { color: var(--rare); }
         .note { color: var(--sub); font-size: 12px; margin-top: 6px; }
         .empty { color: var(--sub); padding: 24px; }
+        button.load { margin-left: auto; background: var(--bg); color: var(--accent); border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -47,6 +48,7 @@
             <input id="q" type="search" placeholder="한글 또는 영어로 검색 (예: 애쉬, Ash, 액시 A1)">
             <label><input id="hideVault" type="checkbox"> 볼트된 세트 숨기기</label>
         </div>
+        <div class="note">시세: warframe.market 접속 중인 판매자 최저가 (마우스를 올리면 최고 구매가) · 10분간 저장 <span id="priceMsg" style="color:var(--vault)"></span></div>
     </header>
     <main id="list"><div class="empty">데이터 불러오는 중…</div></main>
 
@@ -59,28 +61,118 @@
         const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
         const norm = (s) => s.toLowerCase().replace(/\s+/g, "");
 
+        // ---- 시세 (warframe.market) ----
+        // tools/server.py 로 열면 /wfm 프록시를, 아니면 warframe.market API 를 직접 호출한다.
+        const WFM_PROXY = "/wfm/v2", WFM_DIRECT = "https://api.warframe.market/v2";
+        const PRICE_TTL = 10 * 60 * 1000, RETRY_AFTER = 60 * 1000, REQUEST_GAP = 350;
+        const AUTO_PRICE_MAX = 2; // 검색 결과가 이 개수 이하면 시세를 자동으로 불러온다
+        let wfmBase = null, priceFailShown = false, busy = false;
+        const queue = [];
+        const prices = (() => { try { return JSON.parse(localStorage.getItem("wfPrices")) || {}; } catch (e) { return {}; } })();
+        const savePrices = () => { try { localStorage.setItem("wfPrices", JSON.stringify(prices)); } catch (e) {} };
+        const fresh = (p) => p && Date.now() - p.t < (p.err ? RETRY_AFTER : PRICE_TTL);
+        const partOf = (w) => { const s = setByName[w.set]; return s && s.parts.find((x) => x.name === w.part); };
+
+        async function fetchTop(slug) {
+            const bases = wfmBase ? [wfmBase] : [WFM_PROXY, WFM_DIRECT];
+            let lastErr;
+            for (const base of bases) {
+                try {
+                    const res = await fetch(`${base}/orders/item/${slug}/top`);
+                    if (!res.ok) throw new Error("HTTP " + res.status);
+                    const json = await res.json();
+                    wfmBase = base;
+                    return json.data;
+                } catch (e) { lastErr = e; }
+            }
+            throw lastErr;
+        }
+
+        function requestPrices(slugs) {
+            for (const slug of slugs) if (slug && !fresh(prices[slug]) && !queue.includes(slug)) queue.push(slug);
+            pump();
+        }
+
+        async function pump() {
+            if (busy) return;
+            busy = true;
+            while (queue.length) {
+                const slug = queue.shift();
+                try {
+                    const d = await fetchTop(slug);
+                    const sell = d.sell.map((o) => o.platinum), buy = d.buy.map((o) => o.platinum);
+                    prices[slug] = { sell: sell.length ? Math.min(...sell) : null, buy: buy.length ? Math.max(...buy) : null, t: Date.now() };
+                } catch (e) {
+                    prices[slug] = { err: true, t: Date.now() };
+                    if (!priceFailShown) {
+                        priceFailShown = true;
+                        $("priceMsg").textContent = "시세를 불러오지 못했습니다. 브라우저가 warframe.market 직접 접속을 막았을 수 있어요 — README의 tools/server.py 로 실행해 보세요.";
+                    }
+                }
+                savePrices();
+                paintPrices();
+                await new Promise((r) => setTimeout(r, REQUEST_GAP));
+            }
+            busy = false;
+        }
+
+        function priceText(slug) {
+            const p = prices[slug];
+            if (!slug) return "-";
+            if (!p) return "";
+            if (p.err) return '<span title="불러오기 실패">⚠</span>';
+            return `<span title="최고 구매가 ${p.buy ?? "-"}p">${p.sell ?? "-"}p</span>`;
+        }
+
+        // 렐릭 정제 단계별 기대값 = Σ(확률 × 최저 판매가). 시세가 다 모일 때까지는 비워둔다.
+        function evCells(r) {
+            const ps = r.rewards.map((w) => { const p = partOf(w); return p && prices[p.market]; });
+            if (ps.some((p) => !p)) return "<td></td><td></td><td></td><td></td>";
+            return [0, 1, 2, 3].map((i) => {
+                const v = r.rewards.reduce((sum, w, k) => sum + (w.chance[i] / 100) * ((ps[k] && ps[k].sell) || 0), 0);
+                return `<td class="n">${v.toFixed(1)}p</td>`;
+            }).join("");
+        }
+
+        function paintPrices() {
+            document.querySelectorAll("[data-price]").forEach((el) => { el.innerHTML = priceText(el.dataset.price); });
+            document.querySelectorAll("[data-ev]").forEach((el) => {
+                const r = data.relics.find((x) => x.name === el.dataset.ev);
+                el.innerHTML = `<td>기대값</td>${evCells(r)}<td></td>`;
+            });
+        }
+
+        const setSlugs = (s) => [s.market, ...s.parts.map((p) => p.market)];
+        const relicSlugs = (r) => r.rewards.map((w) => (partOf(w) || {}).market);
+
         function setCard(s) {
             const rows = s.parts.map((p) => `
-                <tr><td>${esc(p.ko)}${p.count > 1 ? " ×" + p.count : ""}</td>
+                <tr><td class="nw">${esc(p.ko)}${p.count > 1 ? " ×" + p.count : ""}</td>
                     <td class="n">${p.ducats} 두캇</td>
+                    <td class="n" data-price="${esc(p.market || "")}">${priceText(p.market)}</td>
                     <td>${p.relics.map((r) => `<span class="chip ${r.rarity}" data-relic="${esc(r.relic)}">${esc(r.relic)}</span>`).join("") || "-"}</td></tr>`).join("");
             return `<div class="card">
                 <div class="head">${s.image ? `<img src="${IMG}${esc(s.image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
                     <div><div class="t">${esc(s.ko)}${s.vaulted ? '<span class="badge vault">볼트</span>' : ""}<span class="badge">${esc(s.category)}</span></div>
-                    <div class="e">${esc(s.name)}</div></div></div>
-                <table><tr><th>부품</th><th class="n">두캇</th><th>렐릭 (Intact 기준 희귀도)</th></tr>${rows}</table></div>`;
+                    <div class="e">${esc(s.name)}</div></div>
+                    <button class="load" data-set="${esc(s.name)}">시세</button></div>
+                <table><tr><th>부품</th><th class="n">두캇</th><th class="n">시세</th><th>렐릭 (Intact 기준 희귀도)</th></tr>${rows}
+                    <tr><td>세트 전체</td><td></td><td class="n" data-price="${esc(s.market)}">${priceText(s.market)}</td><td></td></tr></table></div>`;
         }
 
         function relicCard(r) {
             const rows = r.rewards.map((w) => {
-                const s = setByName[w.set], p = s && s.parts.find((x) => x.name === w.part);
+                const s = setByName[w.set], p = partOf(w);
                 return `<tr><td class="${w.rarity}">${esc(s ? s.ko : w.set)} ${esc(p ? p.ko : w.part)}<br><span class="e" style="color:var(--sub)">${RARITY_KO[w.rarity]}</span></td>
-                    ${w.chance.map((c) => `<td class="n">${c}%</td>`).join("")}</tr>`;
+                    ${w.chance.map((c) => `<td class="n">${c}%</td>`).join("")}
+                    <td class="n" data-price="${esc((p && p.market) || "")}">${priceText(p && p.market)}</td></tr>`;
             }).join("");
             return `<div class="card">
-                <div class="head"><div><div class="t">${esc(r.ko)}</div><div class="e">${esc(r.name)} Relic</div></div></div>
-                <table><tr><th>보상</th><th class="n">Intact</th><th class="n">Excep.</th><th class="n">Flawless</th><th class="n">Radiant</th></tr>${rows}</table>
-                ${r.rewards.length < 6 ? '<div class="note">+ 포르마 설계도 등 프라임 부품이 아닌 보상은 표시하지 않음</div>' : ""}</div>`;
+                <div class="head"><div><div class="t">${esc(r.ko)}</div><div class="e">${esc(r.name)} Relic</div></div>
+                    <button class="load" data-relic-price="${esc(r.name)}">시세</button></div>
+                <table><tr><th>보상</th><th class="n">Intact</th><th class="n">Excep.</th><th class="n">Flaw.</th><th class="n">Rad.</th><th class="n">시세</th></tr>${rows}
+                    <tr data-ev="${esc(r.name)}"><td>기대값</td>${evCells(r)}<td></td></tr></table>
+                ${r.rewards.length < 6 ? '<div class="note">+ 포르마 설계도 등 프라임 부품이 아닌 보상은 표시하지 않음 (기대값에서도 제외)</div>' : ""}</div>`;
         }
 
         function render() {
@@ -96,6 +188,7 @@
             const html = items.slice(0, LIMIT).map(tab === "sets" ? setCard : relicCard).join("");
             $("list").innerHTML = html || '<div class="empty">검색 결과가 없습니다.</div>';
             if (items.length > LIMIT) $("list").insertAdjacentHTML("beforeend", `<div class="empty">${items.length - LIMIT}개 더 있음 — 검색어를 더 입력하세요.</div>`);
+            if (q && items.length <= AUTO_PRICE_MAX) items.forEach((x) => requestPrices(tab === "sets" ? setSlugs(x) : relicSlugs(x)));
         }
 
         function switchTab(t) {
@@ -109,8 +202,10 @@
         $("q").addEventListener("input", render);
         $("hideVault").addEventListener("change", render);
         $("list").addEventListener("click", (e) => {
-            const relic = e.target.dataset && e.target.dataset.relic;
-            if (relic) { $("q").value = relic; switchTab("relics"); }
+            const ds = e.target.dataset || {};
+            if (ds.relic) { $("q").value = ds.relic; switchTab("relics"); }
+            if (ds.set) requestPrices(setSlugs(setByName[ds.set]));
+            if (ds.relicPrice) requestPrices(relicSlugs(data.relics.find((r) => r.name === ds.relicPrice)));
         });
 
         fetch("data/primes.json")

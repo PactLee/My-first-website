@@ -33,6 +33,12 @@ def rarity(intact_chance):
 DROP_RE = re.compile(r"^(Lith|Meso|Neo|Axi|Requiem) (\S+) Relic(?: \((Exceptional|Flawless|Radiant)\))?$")
 
 
+def set_slug(name):
+    # warframe.market 세트 주소 규칙: "Cobra & Crane Prime" -> cobra_and_crane_prime_set
+    name = re.sub(r"[^a-z0-9 ]", "", name.lower().replace("&", "and"))
+    return "_".join(name.split()) + "_set"
+
+
 def main(src):
     load = lambda f: json.load(open(os.path.join(src, f), encoding="utf-8"))
     i18n = load("i18n.json")
@@ -85,6 +91,7 @@ def main(src):
                 parts.append(part)
             sets.append({
                 "name": it["name"], "ko": ko(it["uniqueName"]) or it["name"],
+                "market": set_slug(it["name"]),
                 "category": CATEGORY_KO[f], "vaulted": bool(it.get("vaulted")),
                 "image": it.get("imageName"), "parts": parts,
             })
