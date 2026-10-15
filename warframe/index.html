@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>워프레임 도우미 - 프라임 &amp; 렐릭</title>
+    <style>
+        :root { --bg: #14161b; --card: #1e2128; --line: #2e323b; --text: #e6e6e6; --sub: #9aa0aa;
+                --accent: #d8b46a; --common: #c08a5a; --uncommon: #b9bec7; --rare: #e3c45b; --vault: #c0504d; }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; }
+        header { padding: 16px; border-bottom: 1px solid var(--line); }
+        header h1 { margin: 0 0 12px; font-size: 20px; color: var(--accent); }
+        header a { color: var(--sub); font-size: 13px; }
+        .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+        .tabs button { background: var(--card); color: var(--text); border: 1px solid var(--line); padding: 8px 14px; cursor: pointer; border-radius: 6px; }
+        .tabs button.on { border-color: var(--accent); color: var(--accent); }
+        input[type=search] { flex: 1; min-width: 200px; padding: 8px 12px; background: var(--card); color: var(--text); border: 1px solid var(--line); border-radius: 6px; font-size: 15px; }
+        label { color: var(--sub); font-size: 14px; align-self: center; }
+        main { padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+        .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+        .head { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+        .head img { width: 48px; height: 48px; object-fit: contain; }
+        .head .t { font-weight: bold; font-size: 16px; }
+        .head .e { color: var(--sub); font-size: 12px; }
+        .badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; background: var(--line); color: var(--sub); font-weight: normal; }
+        .badge.vault { background: var(--vault); color: #fff; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 4px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
+        th { color: var(--sub); font-weight: normal; }
+        td.n, td:first-child { white-space: nowrap; }
+        td.n { text-align: right; }
+        .chip { display: inline-block; margin: 1px; padding: 1px 6px; border-radius: 4px; background: var(--bg); cursor: pointer; font-size: 12px; }
+        .Common { color: var(--common); } .Uncommon { color: var(--uncommon); } .Rare { color: var(--rare); }
+        .note { color: var(--sub); font-size: 12px; margin-top: 6px; }
+        .empty { color: var(--sub); padding: 24px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>워프레임 도우미 <a href="../index.html">← 홈</a></h1>
+        <div class="controls">
+            <div class="tabs">
+                <button data-tab="sets" class="on">프라임 세트</button>
+                <button data-tab="relics">렐릭</button>
+            </div>
+            <input id="q" type="search" placeholder="한글 또는 영어로 검색 (예: 애쉬, Ash, 액시 A1)">
+            <label><input id="hideVault" type="checkbox"> 볼트된 세트 숨기기</label>
+        </div>
+    </header>
+    <main id="list"><div class="empty">데이터 불러오는 중…</div></main>
+
+    <script>
+        const RARITY_KO = { Common: "흔함", Uncommon: "드묾", Rare: "희귀" };
+        const IMG = "https://cdn.warframestat.us/img/";
+        const LIMIT = 60;
+        let data, setByName, tab = "sets";
+        const $ = (id) => document.getElementById(id);
+        const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+        const norm = (s) => s.toLowerCase().replace(/\s+/g, "");
+
+        function setCard(s) {
+            const rows = s.parts.map((p) => `
+                <tr><td>${esc(p.ko)}${p.count > 1 ? " ×" + p.count : ""}</td>
+                    <td class="n">${p.ducats} 두캇</td>
+                    <td>${p.relics.map((r) => `<span class="chip ${r.rarity}" data-relic="${esc(r.relic)}">${esc(r.relic)}</span>`).join("") || "-"}</td></tr>`).join("");
+            return `<div class="card">
+                <div class="head">${s.image ? `<img src="${IMG}${esc(s.image)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
+                    <div><div class="t">${esc(s.ko)}${s.vaulted ? '<span class="badge vault">볼트</span>' : ""}<span class="badge">${esc(s.category)}</span></div>
+                    <div class="e">${esc(s.name)}</div></div></div>
+                <table><tr><th>부품</th><th class="n">두캇</th><th>렐릭 (Intact 기준 희귀도)</th></tr>${rows}</table></div>`;
+        }
+
+        function relicCard(r) {
+            const rows = r.rewards.map((w) => {
+                const s = setByName[w.set], p = s && s.parts.find((x) => x.name === w.part);
+                return `<tr><td class="${w.rarity}">${esc(s ? s.ko : w.set)} ${esc(p ? p.ko : w.part)}<br><span class="e" style="color:var(--sub)">${RARITY_KO[w.rarity]}</span></td>
+                    ${w.chance.map((c) => `<td class="n">${c}%</td>`).join("")}</tr>`;
+            }).join("");
+            return `<div class="card">
+                <div class="head"><div><div class="t">${esc(r.ko)}</div><div class="e">${esc(r.name)} Relic</div></div></div>
+                <table><tr><th>보상</th><th class="n">Intact</th><th class="n">Excep.</th><th class="n">Flawless</th><th class="n">Radiant</th></tr>${rows}</table>
+                ${r.rewards.length < 6 ? '<div class="note">+ 포르마 설계도 등 프라임 부품이 아닌 보상은 표시하지 않음</div>' : ""}</div>`;
+        }
+
+        function render() {
+            const q = norm($("q").value);
+            const hide = $("hideVault").checked;
+            let items;
+            if (tab === "sets") {
+                items = data.sets.filter((s) => (!hide || !s.vaulted) && (!q || norm(s.ko).includes(q) || norm(s.name).includes(q)));
+            } else {
+                items = data.relics.filter((r) => !q || norm(r.ko).includes(q) || norm(r.name).includes(q)
+                    || r.rewards.some((w) => norm(w.set).includes(q) || norm(setByName[w.set] ? setByName[w.set].ko : "").includes(q)));
+            }
+            const html = items.slice(0, LIMIT).map(tab === "sets" ? setCard : relicCard).join("");
+            $("list").innerHTML = html || '<div class="empty">검색 결과가 없습니다.</div>';
+            if (items.length > LIMIT) $("list").insertAdjacentHTML("beforeend", `<div class="empty">${items.length - LIMIT}개 더 있음 — 검색어를 더 입력하세요.</div>`);
+        }
+
+        function switchTab(t) {
+            tab = t;
+            document.querySelectorAll(".tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === t));
+            $("hideVault").parentElement.style.display = t === "sets" ? "" : "none";
+            render();
+        }
+
+        document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab)));
+        $("q").addEventListener("input", render);
+        $("hideVault").addEventListener("change", render);
+        $("list").addEventListener("click", (e) => {
+            const relic = e.target.dataset && e.target.dataset.relic;
+            if (relic) { $("q").value = relic; switchTab("relics"); }
+        });
+
+        fetch("data/primes.json")
+            .then((r) => r.json())
+            .then((d) => { data = d; setByName = Object.fromEntries(d.sets.map((s) => [s.name, s])); render(); })
+            .catch(() => { $("list").innerHTML = '<div class="empty">데이터를 불러오지 못했습니다. 파일을 직접 열지 말고 웹 서버(GitHub Pages 등)로 열어주세요.</div>'; });
+    </script>
+</body>
+</html>
