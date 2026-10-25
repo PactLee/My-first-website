@@ -61,7 +61,8 @@ async function loadIndex() {
     state.byId.set(row[0], row);
     if (row[3] === 'relics') state.relicIds.set(row[2], row[0]);
   }
-  $('#data-version').textContent = state.index.version ? `v${state.index.version}` : '';
+  const ix = state.index;
+  $('#data-version').textContent = [ix.version && `WFCD v${ix.version}`, ix.pep && `Public Export v${ix.pep}`, ix.built && `기준일 ${ix.built}`].filter(Boolean).join(' · ');
 }
 function loadCat(cat) {
   if (!state.cats[cat]) {
@@ -187,8 +188,15 @@ const KIND = {
   refine: { label: '정제·제작 자원', hint: '설계도로 만드는 자원' },
   farm: { label: '파밍 자원', hint: '미션·오픈월드에서 모으기' },
   drop: { label: '파밍 부품', hint: '드랍으로 얻기' },
-  buy: { label: '설계도 구매', hint: '시장·상인에게서 사기' },
+  buy: { label: '구매·연구', hint: '시장·상점·클랜 도장에서 얻기' },
 };
+
+// 드랍이 아닌 획득처: ["d", 복제 크레딧] 클랜 도장 연구, ["s", 신디케이트, 등급, 평판, 크레딧] 상점
+function srcText(x) {
+  if (x[0] === 'd') return `클랜 도장 연구${x[1] ? ` · 연구 후 설계도 ${fmt(x[1])} 크레딧` : ''}`;
+  if (x[0] === 's') return `${esc(x[1])} 상점${x[2] ? ` · ${esc(x[2])} 등급` : ''}${x[3] ? ` · 평판 ${fmt(x[3])}` : ''}${x[4] ? ` · ${fmt(x[4])} 크레딧` : ''}`;
+  return '';
+}
 
 function legend() {
   return `<div class="legend">${Object.entries(KIND).map(([k, v]) => `<span><i class="dot k-${k}"></i>${v.label}</span>`).join('')}</div>`;
@@ -223,13 +231,16 @@ function treeNode(row) {
   const meta = [];
   if (row.b) meta.push(`${fmt(row.b.cr)} 크레딧`, duration(row.b.tm), row.b.q > 1 ? `${row.b.q}개 생산` : '');
   if (kind === 'drop') meta.push(`추천: ${bestDrop(row.dr || [row.d1])}`);
-  if (kind === 'buy') meta.push(row.how ? esc(row.how) : '드랍 정보 없음 (시장·퀘스트·상인)');
+  if (kind === 'buy') {
+    if (row.src) row.src.slice(0, 2).forEach((x) => meta.push(srcText(x)));
+    else meta.push(row.how ? esc(row.how) : '드랍 정보 없음 (시장·퀘스트·상인)');
+  }
   if (row.du) meta.push(`두캇 ${row.du}`);
   let extra = '';
   if (row.dr) extra += `<details class="node-drops"><summary>획득처 ${row.dr.length}곳 보기</summary>${dropsTable(row.dr, { limit: 8 })}</details>`;
   if (row.b && row.id == null && !row.dr && !row.d1) {
-    const bp = row.b.l.find((x) => x.id == null && /Blueprint$/.test(x.e || ''));
-    if (!bp) extra += '<div class="r-sub">이 부품의 설계도 획득처는 위키를 참고하세요.</div>';
+    if (row.src) meta.push(`설계도: ${srcText(row.src[0])}`);
+    else if (!row.b.l.some((x) => x.id == null && /Blueprint$/.test(x.e || ''))) extra += '<div class="r-sub">이 부품의 설계도 획득처는 위키를 참고하세요.</div>';
   }
   const children = row.b ? `<ul>${row.b.l.map(treeNode).join('')}</ul>` : '';
   return `<li><div class="node k-${kind}"><i class="dot k-${kind}"></i><div class="node-main">
@@ -287,8 +298,10 @@ async function renderDetail(id) {
   const how = [];
   if (rec.mp) how.push(`시장에서 <b>${fmt(rec.mp)} 플래티넘</b>으로 완제품 구매`);
   if (rec.bp) how.push(`시장에서 설계도를 <b>${fmt(rec.bp)} 크레딧</b>에 구매 후 제작`);
-  if (rec.b && !rec.bp && rec.b.l.some((x) => x.dr)) how.push('부품·설계도를 아래 획득처에서 파밍한 뒤 주조소에서 제작');
+  if (rec.b && !rec.bp && rec.b.l.some((x) => x.dr || x.src)) how.push('부품·설계도를 아래 획득처에서 파밍한 뒤 주조소에서 제작');
   if (rec.dr) how.push('아래 획득처에서 직접 드랍');
+  if (rec.src) rec.src.forEach((x) => how.push(srcText(x)));
+  if (rec.pl) how.push(`<b>행성</b>: ${rec.pl.map(esc).join(', ')} 미션에서 드랍 (게임 내 설명)`);
   if (rec.c === 'relics') how.push(rec.dr ? '아래 미션 보상으로 획득 후 보이드 균열 미션에서 개봉' : '현재 볼트됨 — 거래 또는 프라임 리서전스(Varzia)로만 획득');
   const ga = rec.ga;
   if (ga) {
@@ -427,7 +440,7 @@ function planNode(n, have) {
   const meta = [];
   if (n.b) meta.push(`${fmt(n.b.cr * n.times)} 크레딧`, duration(n.b.tm));
   if (n.kind === 'drop' && n.part) meta.push(`추천: ${bestDrop(n.part.dr)}`);
-  if (n.kind === 'buy') meta.push(n.part && n.part.how ? esc(n.part.how) : '시장·퀘스트·상인');
+  if (n.kind === 'buy') meta.push(n.part && n.part.src ? srcText(n.part.src[0]) : n.part && n.part.how ? esc(n.part.how) : '시장·퀘스트·상인');
   if (n.kind === 'refine' || (n.kind === 'farm' && n.id != null && state.craftable.has(n.id))) {
     meta.push(`<button class="link-btn" data-craft-toggle="${n.id}" data-to="${n.kind === 'refine' ? 0 : 1}">${n.kind === 'refine' ? '파밍으로 계산' : '직접 제작으로 계산'}</button>`);
   }
@@ -465,7 +478,7 @@ async function renderPlan() {
   const have = store('wf-have', {});
   const resRows = [...acc.res.entries()].map(([id, q]) => [state.byId.get(id), q]).filter((x) => x[0])
     .sort((a, b) => a[0][1].localeCompare(b[0][1], 'ko'));
-  const farmParts = [...acc.parts.values()].filter((x) => !x.b);
+  const farmParts = [...acc.parts.values()];
   const resDone = resRows.filter(([r]) => have['r' + r[0]]).length;
   const partDone = farmParts.filter((x) => have['p' + x.e]).length;
 
@@ -483,6 +496,39 @@ async function renderPlan() {
     return `<div class="plan-row">${img(r.img, 'thumb')}<span class="grow">${itemLink(r.id, r.n)}<span class="r-sub">${esc(r.e)}</span></span>
       <label class="r-sub" for="pq-${r.id}">개수</label><input id="pq-${r.id}" type="number" min="1" value="${q}" data-plan-q="${r.id}"><button class="btn small" data-plan-del="${r.id}">삭제</button></div>`;
   }).join('')}<div class="btns"><button class="btn small" data-plan-clear>계획 비우기</button></div></div>`;
+
+  // 지금 갈 곳: 아직 없는 재료를 같은 장소에서 함께 얻을 수 있게 묶는다
+  const spots = new Map();
+  const addSpot = (key, label, item, chance) => {
+    let sp = spots.get(key);
+    if (!sp) spots.set(key, sp = { label, items: new Map() });
+    const prev = sp.items.get(item);
+    if (prev === undefined || (chance ?? 0) > (prev ?? 0)) sp.items.set(item, chance);
+  };
+  const addDrops = (name, dr) => {
+    for (const d of (dr || []).slice(0, 12)) {
+      if ((d[4] && d[4].vt) || /콘클레이브|Conclave/.test(d[0])) continue;
+      const place = d[0].replace(/, 로테이션 [A-Z]$/, '');
+      addSpot('d' + place, place, name, d[1]);
+    }
+  };
+  for (const x of farmParts) if (!have['p' + x.e]) addDrops(x.n, x.dr);
+  for (const { rec } of acc.direct) addDrops(rec.n, rec.dr);
+  for (const [r] of resRows) {
+    if (have['r' + r[0]]) continue;
+    const rec = await getRecord(r[0]);
+    if (!rec) continue;
+    addDrops(rec.n, rec.dr);
+    for (const pl of rec.pl || []) addSpot('p' + pl, `${pl} (행성 미션 어디서나)`, rec.n, null);
+  }
+  const spotList = [...spots.values()].filter((x) => x.items.size)
+    .sort((a, b) => b.items.size - a.items.size || Math.max(...b.items.values()) - Math.max(...a.items.values())).slice(0, 6);
+  if (spotList.length) {
+    h += `<div class="card"><h2>지금 갈 곳</h2><p class="muted">아직 체크하지 않은 재료를 한 번에 많이 얻을 수 있는 장소 순서입니다.</p><div class="farm-list">
+      ${spotList.map((sp) => `<div class="farm-item spot"><div class="farm-head"><b>${esc(sp.label)}</b><span class="chip">${sp.items.size}종</span></div>
+        ${[...sp.items.entries()].map(([n, c]) => `<div class="farm-src"><span>${esc(n)}</span>${c != null ? `<span class="bar"><i style="width:${Math.max(2, Math.min(100, c))}%"></i></span><span class="num">${pct(c)}</span>` : '<span></span><span></span>'}</div>`).join('')}
+      </div>`).join('')}</div></div>`;
+  }
 
   // 제작 순서 로드맵
   if (acc.steps.length) {
@@ -516,9 +562,9 @@ async function renderPlan() {
     h += `<div class="card"><h2>파밍·구매할 부품과 설계도</h2><div class="farm-list">${farmParts.map((x) => {
       const done = have['p' + x.e];
       const best = x.dr ? x.dr.slice(0, 3).map((d) => `<div class="farm-src"><span>${esc(d[0])}${d[4] && d[4].vt ? ' <span class="tag vault">볼트됨</span>' : ''}</span><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span><span class="num">${pct(d[1])}</span></div>`).join('')
-        : `<div class="r-sub">${x.how ? esc(x.how) : '드랍 정보 없음 (시장·퀘스트·상인)'}</div>`;
+        : `<div class="r-sub">${x.src ? x.src.slice(0, 2).map(srcText).join('<br>') : x.how ? esc(x.how) : '드랍 정보 없음 (시장·퀘스트·상인)'}</div>`;
       return `<div class="farm-item k-${x.kind}${done ? ' done' : ''}" data-have-row><div class="farm-head"><input type="checkbox" class="have-box" data-have="p${esc(x.e)}" ${done ? 'checked' : ''} aria-label="보유">
-        <i class="dot k-${x.kind}"></i><b>${esc(x.n)}</b><span class="qty">× ${fmt(x.q)}</span></div>${best}</div>`;
+        <i class="dot k-${x.kind}"></i><b>${esc(x.n)}${x.b ? ' 설계도' : ''}</b><span class="qty">× ${fmt(x.q)}</span></div>${best}</div>`;
     }).join('')}</div></div>`;
   }
 
@@ -606,6 +652,11 @@ function renderGuide() {
     <li>검색창에 <b>채광</b>, <b>낚시</b>, <b>물고기 분해</b>, <b>채집</b>, <b>정제</b>, <b>동물 보호</b>를 입력하면 해당 방식으로 얻는 자원만 모아 볼 수 있습니다.</li>
     <li>광석·보석 상세 화면에는 광맥 색과 지역, 필요한 채굴 도구가, 물고기에는 지역·시간대(날씨)·추천 작살·미끼·분해 부위가 표시됩니다.</li>
     <li>얼로이·가공 보석은 원석을 모아 설계도로 <b>정제</b>합니다. 설계도 판매처는 상세 화면 설명에 나옵니다.</li>
+  </ul>
+  <h2>제작 계획 활용</h2>
+  <ul>
+    <li><b>지금 갈 곳</b>: 아직 체크하지 않은 재료를 한 장소에서 가장 많이 얻을 수 있는 곳부터 보여줍니다. 행성 단위 자원은 "행성 미션 어디서나"로 표시됩니다.</li>
+    <li>드랍되지 않는 설계도는 <b>신디케이트 상점</b>(필요 등급·평판)이나 <b>클랜 도장 연구</b>(연구 후 복제 크레딧)로 표시됩니다.</li>
   </ul>
   <h2>명칭과 데이터</h2>
   <ul>

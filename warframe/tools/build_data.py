@@ -197,7 +197,7 @@ nodes = load("Node.json")
 en2ko = {}
 for src in (list(by_unique.values()) + relics_raw):
     n, k = src.get("name"), ko_name(src)
-    if n and k and n not in en2ko:
+    if n and k and k != clean(n) and n not in en2ko:
         en2ko[n] = k
 planet_ko = {}
 for nd in nodes:
@@ -207,6 +207,50 @@ for nd in nodes:
         planet_ko.setdefault(sn, k)
 # 지역 이름 (오픈 월드) — 공식 번역이 확인된 것만
 planet_ko.setdefault("Cetus", "세투스")
+
+
+def load_pep(name):
+    if not PEP:
+        return {}
+    path = os.path.join(PEP, name)
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+pep_ko = load_pep("dict.ko.json")
+pep_en = load_pep("dict.en.json")
+
+# 공식 미션 타입 번역 (Interception → 감청 등). 이미 확인한 번역은 유지
+for mt in load_pep("ExportMissionTypes.json").values():
+    en, k = pep_en.get(mt.get("name")), pep_ko.get(mt.get("name"))
+    if en and k and k != en:
+        MISSION_KO.setdefault(en.title() if en.isupper() else en, k)
+
+# 적 이름 공식 번역 (WFCD 번역에는 적 이름이 빠져 있다)
+for av in load_pep("ExportEnemies.json").get("avatars", {}).values():
+    en, k = pep_en.get(av.get("name")), pep_ko.get(av.get("name"))
+    if en and k and en != k:
+        en = clean(en)
+        ko_by_en.setdefault(en, clean(k))
+        en2ko.setdefault(en, clean(k))
+
+# 그 밖의 정확히 일치하는 공식 문자열 (영어 → 한국어가 하나로만 대응하는 것만)
+pep_text = {}
+_dup = set()
+for key, en in pep_en.items():
+    k = pep_ko.get(key)
+    if not k or not en or k == en or len(en) > 60:
+        continue
+    if en in pep_text and pep_text[en] != k:
+        _dup.add(en)
+    pep_text.setdefault(en, k)
+for en in _dup:
+    pep_text.pop(en, None)
+pep_upper = {}
+for en, k in pep_text.items():
+    pep_upper.setdefault(en.upper(), k)
 
 
 # ---------------------------------------------------------------------------
@@ -244,10 +288,12 @@ def tr_mission_part(s):
     """괄호 안 문자열 (예: 'Survival', 'Level 15 - 25 Plague Star') 번역."""
     if s in MISSION_KO:
         return MISSION_KO[s]
+    if s.upper() in pep_upper and not s.startswith("Level"):
+        return pep_upper[s.upper()]
     out = s
     for en, k in PHRASE_KO:
         out = out.replace(en, k)
-    for en, k in MISSION_KO.items():
+    for en, k in sorted(MISSION_KO.items(), key=lambda x: -len(x[0])):
         out = re.sub(r"\b" + re.escape(en) + r"\b", k, out)
     out = re.sub(r"\bLevel\b", "레벨", out)
     return out
@@ -259,6 +305,8 @@ def tr_location(loc):
         return loc
     if loc in en2ko:
         return en2ko[loc]
+    if loc in pep_text:
+        return pep_text[loc]
     m = RELIC_RE.match(loc)
     if m:
         name = relic_ko(m.group(1))
@@ -276,11 +324,23 @@ def tr_location(loc):
     m = re.match(r"^([^/]+)/([^(]+?)(?: \((.+)\))?$", loc)
     if m:
         planet, node, mission = m.group(1), m.group(2), m.group(3)
-        out = f"{planet_ko.get(planet, planet)}/{planet_ko.get(node, en2ko.get(node, node))}"
+        out = f"{planet_ko.get(planet, pep_text.get(planet, planet))}/{planet_ko.get(node, node)}"
         if mission:
             out += f" ({tr_mission_part(mission)})"
         return out + stage + rot
-    return loc + stage + rot
+    # 마지막 수단: "신디케이트, 등급" / "적 이름 (Level 71 - 100)" 처럼 조각별로 공식 문자열 번역
+    return ", ".join(tr_segment(x) for x in loc.split(", ")) + stage + rot
+
+
+def tr_word(text):
+    return en2ko.get(text) or pep_text.get(text) or pep_upper.get(text.upper()) or text
+
+
+def tr_segment(seg):
+    m = re.match(r"^(.*?) \((.+)\)$", seg)
+    if m:
+        return f"{tr_word(m.group(1))} ({tr_mission_part(m.group(2))})"
+    return tr_word(seg)
 
 
 def pack_drops(drops):
@@ -392,6 +452,7 @@ def recipe_build(result_unique, parent):
             row["id"] = index_of[iu]
             used_in[iu].add(index_of[parent["uniqueName"]])
         elif iu in components:
+            row["_u"] = iu
             row["n"] = comp_display(iu, parent)
             row["e"] = f"{parent.get('name')} {components[iu]['name']}"
         else:
@@ -475,6 +536,7 @@ for u in order:
                 used_in[cu].add(rid)
             elif cu in components:
                 comp = components[cu]
+                row["_u"] = cu
                 row["n"] = comp_display(cu, it)
                 row["e"] = f"{it.get('name')} {comp['name']}"
                 if comp.get("imageName"):
@@ -638,6 +700,66 @@ for u in order:
     rec["ga"] = ga
     aliases[rec["id"]].append(ga["m"])
 
+# ---------------------------------------------------------------------------
+# 4-2) 드랍이 아닌 획득처: 신디케이트 상점, 클랜 도장 연구 (공식 Public Export)
+# ---------------------------------------------------------------------------
+bp_of = {}  # 결과물 → 설계도 uniqueName
+for key, rcp in load_pep("ExportRecipes.json").items():
+    bp_of.setdefault(rcp.get("resultType"), key)
+dojo_price = {k: v.get("replicatePrice") or 0 for k, v in load_pep("ExportDojoRecipes.json").get("research", {}).items()}
+syn_src = defaultdict(list)
+for syn in load_pep("ExportSyndicates.json").values():
+    sname = clean(pep_ko.get(syn.get("name")) or pep_en.get(syn.get("name")) or "")
+    if not sname:
+        continue
+    titles = {t.get("level"): clean(pep_ko.get(t.get("name")) or "") for t in syn.get("titles") or []}
+    for fav in syn.get("favours") or []:
+        item = fav["storeItem"].replace("/Lotus/StoreItems/", "/Lotus/", 1)
+        syn_src[item].append(["s", sname, titles.get(fav.get("requiredLevel"), ""), fav.get("standingCost") or 0, fav.get("creditsCost") or 0])
+
+
+def sources(u):
+    out = []
+    for key in (u, bp_of.get(u)):
+        if not key:
+            continue
+        if key in dojo_price:
+            out.append(["d", dojo_price[key]])
+        out.extend(syn_src.get(key, []))
+    uniq = []
+    for x in out:
+        if x not in uniq:
+            uniq.append(x)
+    return uniq[:6]
+
+
+def add_sources(build):
+    for row in build["l"]:
+        cu = row.pop("_u", None)
+        if cu and not row.get("dr"):
+            src = sources(cu)
+            if src:
+                row["src"] = src
+        if row.get("b"):
+            add_sources(row["b"])
+
+
+PLANETS_KO = set(planet_ko.values())
+for u in order:
+    rec = records[index_of[u]]
+    if rec.get("b"):
+        add_sources(rec["b"])
+    src = sources(u)
+    if src:
+        rec["src"] = src
+    # 설명의 "획득 가능 장소: 세레스, 토성 및 데이모스" → 행성 목록
+    m = re.search(r"획득 가능 장소\s*:\s*([^\n.]+)", rec.get("d", ""))
+    if m:
+        parts = [x.strip() for x in re.split(r",|및|그리고", m.group(1))]
+        pl = [x for x in parts if x in PLANETS_KO]
+        if pl:
+            rec["pl"] = pl
+
 # 설계도로 만드는 자원: 정제 자원이나 획득 장소 설명이 없는 자원은 기본적으로 "제작"으로 계산
 for u in order:
     rec = records[index_of[u]]
@@ -765,8 +887,17 @@ if os.path.exists(pkg_json):
     with open(pkg_json, encoding="utf-8") as f:
         pkg_version = json.load(f).get("version")
 
+import datetime
+
+pep_version = None
+if PEP and os.path.exists(os.path.join(PEP, "package.json")):
+    with open(os.path.join(PEP, "package.json"), encoding="utf-8") as f:
+        pep_version = json.load(f).get("version")
+
 dump("index.json", {
     "version": pkg_version,
+    "pep": pep_version,
+    "built": datetime.date.today().isoformat(),
     "img": IMG_BASE,
     "cats": CATEGORY_LABELS,
     "items": index,
