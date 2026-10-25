@@ -577,7 +577,9 @@ async function expandBuild(info, b, mult, acc, depth = 0) {
 }
 
 function planNode(n, have) {
-  const done = n.key && have[n.key];
+  const total = n.key ? have.need(n.key) : 0;
+  const got = n.key ? have.get(n.key) : 0;
+  const done = n.key && !n.b && total && got >= total;
   const name = n.id != null ? itemLink(n.id, n.name) : `<b>${nameLink(n.name, n.part && n.part.e)}</b>`;
   const meta = [];
   if (n.b) meta.push(`${fmt(n.b.cr * n.times)} 크레딧`, duration(n.b.tm));
@@ -588,15 +590,35 @@ function planNode(n, have) {
     meta.push(`<button class="link-btn" data-craft-toggle="${n.id}" data-to="${n.kind === 'refine' ? 0 : 1}">${n.kind === 'refine' ? '파밍으로 계산' : '직접 제작으로 계산'}</button>`);
   }
   const icon = img(n.id != null ? state.byId.get(n.id)?.[5] : n.part && n.part.img, 'node-img');
-  const box = n.key && !n.b ? `<input type="checkbox" class="have-box" data-have="${esc(n.key)}" ${done ? 'checked' : ''} aria-label="보유">` : '';
+  if (n.key && !n.b && total) meta.unshift(`<b class="${done ? 'ok-text' : ''}">보유 ${fmt(Math.min(got, total))} / ${fmt(total)}</b>`);
+  const box = n.key && !n.b ? fullBox(n.key, got, total) : '';
   const kids = n.children && n.children.length ? `<ul>${n.children.map((c) => planNode(c, have)).join('')}</ul>` : '';
   return `<li><div class="node k-${n.kind}${done ? ' done' : ''}" data-have-row>${box}<i class="dot k-${n.kind}"></i>${icon}<div class="node-main">
     <div class="node-title">${name}<span class="qty">× ${fmt(n.q)}</span></div><div class="node-meta">${chips(meta)}</div></div></div>${kids}</li>`;
 }
 
-function progress(done, total) {
+// 보유 수량: wf-owned = { 키: 개수 }. 예전 버전의 체크(wf-have)는 "다 모음"으로 취급한다
+function ownedStore() { return store('wf-owned', {}); }
+function ownedOf(key, need, owned = ownedStore(), legacy = store('wf-have', {})) {
+  if (owned[key] != null) return Math.max(0, Number(owned[key]) || 0);
+  return legacy[key] ? need : 0;
+}
+function ownedInput(key, have, need, cls = '') {
+  return `<span class="owned ${cls}"><input type="number" min="0" inputmode="numeric" class="owned-input" data-owned="${esc(key)}" value="${have}" aria-label="보유 수량">
+    <span class="owned-need">/ ${fmt(need)}</span></span>`;
+}
+function fullBox(key, have, need) {
+  return `<input type="checkbox" class="have-box" data-have="${esc(key)}" data-need="${need}" ${have >= need ? 'checked' : ''} title="다 모음" aria-label="다 모음">`;
+}
+function miniBar(have, need) {
+  const p = need ? Math.min(100, Math.round((have / need) * 100)) : 0;
+  return `<div class="progress mini${p >= 100 ? ' full' : ''}"><i style="width:${p}%"></i></div>`;
+}
+
+function progress(done, total, avg) {
   const p = total ? Math.round((done / total) * 100) : 0;
-  return `<div class="progress"><i style="width:${p}%"></i></div><div class="r-sub">${done} / ${total} 완료</div>`;
+  const bar = avg != null ? Math.round(avg * 100) : p;
+  return `<div class="progress"><i style="width:${bar}%"></i></div><div class="r-sub">${done} / ${total} 완료${avg != null && total ? ` · 진행률 ${bar}%` : ''}</div>`;
 }
 
 async function renderPlan() {
@@ -619,19 +641,30 @@ async function renderPlan() {
     trees.push([rec, x.q, node]);
   }
   state.craftable = acc.craftable;
-  const have = store('wf-have', {});
   const resRows = [...acc.res.entries()].map(([id, q]) => [state.byId.get(id), q]).filter((x) => x[0])
     .sort((a, b) => nameCompare(a[0][1], b[0][1]));
   const farmParts = [...acc.parts.values()];
-  const resDone = resRows.filter(([r]) => have['r' + r[0]]).length;
-  const partDone = farmParts.filter((x) => have['p' + x.e]).length;
+  const ownedMap = ownedStore(), legacy = store('wf-have', {});
+  const needMap = new Map();
+  for (const [r, q] of resRows) needMap.set('r' + r[0], q);
+  for (const x of farmParts) needMap.set('p' + x.e, x.q);
+  const have = {
+    need: (k) => needMap.get(k) || 0,
+    get: (k) => ownedOf(k, needMap.get(k) || 0, ownedMap, legacy),
+  };
+  const isDone = (k) => have.get(k) >= have.need(k);
+  const ratio = (keys) => (keys.length ? keys.reduce((s, k) => s + Math.min(1, have.get(k) / (have.need(k) || 1)), 0) / keys.length : 0);
+  const resKeys = resRows.map(([r]) => 'r' + r[0]);
+  const partKeys = farmParts.map((x) => 'p' + x.e);
+  const resDone = resKeys.filter(isDone).length;
+  const partDone = partKeys.filter(isDone).length;
 
   // 요약
   let h = `<div class="summary">
     <div class="tile"><span class="tile-label">총 크레딧</span><span class="tile-value">${fmt(acc.credits)}</span><span class="r-sub">부품·정제 포함</span></div>
     <div class="tile"><span class="tile-label">최소 소요 시간</span><span class="tile-value">${acc.time ? duration(acc.time) : '-'}</span><span class="r-sub">동시 제작 기준</span></div>
-    <div class="tile"><span class="tile-label">모을 자원</span><span class="tile-value">${resRows.length}종</span>${progress(resDone, resRows.length)}</div>
-    <div class="tile"><span class="tile-label">파밍·구매할 부품</span><span class="tile-value">${farmParts.length}개</span>${progress(partDone, farmParts.length)}</div>
+    <div class="tile"><span class="tile-label">모을 자원</span><span class="tile-value">${resRows.length}종</span>${progress(resDone, resRows.length, ratio(resKeys))}</div>
+    <div class="tile"><span class="tile-label">파밍·구매할 부품</span><span class="tile-value">${farmParts.length}개</span>${progress(partDone, farmParts.length, ratio(partKeys))}</div>
   </div>`;
 
   // 목표 아이템
@@ -656,10 +689,10 @@ async function renderPlan() {
       addSpot('d' + place, place, name, d[1], d[4] ? placeLink(d) : null);
     }
   };
-  for (const x of farmParts) if (!have['p' + x.e]) addDrops(x.n, x.dr);
+  for (const x of farmParts) if (!isDone('p' + x.e)) addDrops(x.n, x.dr);
   for (const { rec } of acc.direct) addDrops(rec.n, rec.dr);
   for (const [r] of resRows) {
-    if (have['r' + r[0]]) continue;
+    if (isDone('r' + r[0])) continue;
     const rec = await getRecord(r[0]);
     if (!rec) continue;
     addDrops(rec.n, rec.dr);
@@ -668,7 +701,7 @@ async function renderPlan() {
   const spotList = [...spots.values()].filter((x) => x.items.size)
     .sort((a, b) => b.items.size - a.items.size || Math.max(...b.items.values()) - Math.max(...a.items.values())).slice(0, 6);
   if (spotList.length) {
-    h += `<div class="card"><h2>지금 갈 곳</h2><p class="muted">아직 체크하지 않은 재료를 한 번에 많이 얻을 수 있는 장소 순서입니다.</p><div class="farm-list">
+    h += `<div class="card"><h2>지금 갈 곳</h2><p class="muted">아직 다 모으지 못한 재료를 한 번에 많이 얻을 수 있는 장소 순서입니다.</p><div class="farm-list">
       ${spotList.map((sp) => `<div class="farm-item spot"><div class="farm-head"><b>${sp.link || (sp.label.includes('행성 미션') ? esc(sp.label) : locLink(sp.label))}</b><span class="chip">${sp.items.size}종</span></div>
         ${[...sp.items.entries()].map(([n, c]) => `<div class="farm-src"><span>${nameLink(n)}</span>${c != null ? `<span class="bar"><i style="width:${Math.max(2, Math.min(100, c))}%"></i></span><span class="num">${pct(c)}</span>` : '<span></span><span></span>'}</div>`).join('')}
       </div>`).join('')}</div></div>`;
@@ -694,21 +727,28 @@ async function renderPlan() {
   // 필요 자원
   if (resRows.length) {
     h += `<div class="card"><h2>모아야 할 자원</h2><div class="res-grid">${resRows.map(([r, q]) => {
-      const done = have['r' + r[0]];
+      const key = 'r' + r[0];
+      const got = have.get(key);
+      const done = got >= q;
       const canCraft = acc.craftable.has(r[0]);
-      return `<div class="res-tile${done ? ' done' : ''}" data-have-row><input type="checkbox" class="have-box" data-have="r${r[0]}" ${done ? 'checked' : ''} aria-label="보유">
-        ${img(r[5], 'res-img')}<div><div class="res-qty">${fmt(q)}</div>${itemLink(r[0])}${canCraft ? `<div><button class="link-btn" data-craft-toggle="${r[0]}" data-to="1">직접 제작으로 계산</button></div>` : ''}</div></div>`;
-    }).join('')}</div><p class="muted">체크하면 보유한 것으로 표시됩니다. 자원 이름을 누르면 파밍 위치를 볼 수 있습니다.</p></div>`;
+      return `<div class="res-tile${done ? ' done' : ''}" data-have-row>${fullBox(key, got, q)}
+        ${img(r[5], 'res-img')}<div class="res-body">${itemLink(r[0])}
+        ${ownedInput(key, got, q)}
+        ${miniBar(got, q)}<div class="r-sub">${done ? '다 모음' : `${fmt(q - got)}개 남음`}</div>
+        ${canCraft ? `<div><button class="link-btn" data-craft-toggle="${r[0]}" data-to="1">직접 제작으로 계산</button></div>` : ''}</div></div>`;
+    }).join('')}</div><p class="muted">모은 개수를 입력하면 남은 개수와 진행률이 바뀝니다. 체크박스는 "다 모음"입니다. 자원 이름을 누르면 파밍 위치를 볼 수 있습니다.</p></div>`;
   }
 
   // 파밍할 부품
   if (farmParts.length) {
     h += `<div class="card"><h2>파밍·구매할 부품과 설계도</h2><div class="farm-list">${farmParts.map((x) => {
-      const done = have['p' + x.e];
+      const key = 'p' + x.e;
+      const got = have.get(key);
+      const done = got >= x.q;
       const best = x.dr ? x.dr.slice(0, 3).map((d) => `<div class="farm-src"><span>${placeLink(d)}${d[4] && d[4].vt ? ' <span class="tag vault">볼트됨</span>' : ''}</span><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span><span class="num">${pct(d[1])}</span></div>`).join('')
         : `<div class="r-sub">${x.src ? x.src.slice(0, 2).map(srcText).join('<br>') : x.how ? esc(x.how) : unknownText(x.e)}</div>`;
-      return `<div class="farm-item k-${x.kind}${done ? ' done' : ''}" data-have-row><div class="farm-head"><input type="checkbox" class="have-box" data-have="p${esc(x.e)}" ${done ? 'checked' : ''} aria-label="보유">
-        <i class="dot k-${x.kind}"></i>${img(x.img, 'side-img')}<b>${nameLink(x.n, x.e)}${x.b ? ' 설계도' : ''}</b><span class="qty">× ${fmt(x.q)}</span></div>${best}</div>`;
+      return `<div class="farm-item k-${x.kind}${done ? ' done' : ''}" data-have-row><div class="farm-head">${fullBox(key, got, x.q)}
+        <i class="dot k-${x.kind}"></i>${img(x.img, 'side-img')}<b>${nameLink(x.n, x.e)}${x.b ? ' 설계도' : ''}</b>${x.q > 1 ? ownedInput(key, got, x.q, 'small') : ''}</div>${best}</div>`;
     }).join('')}</div></div>`;
   }
 
@@ -728,10 +768,16 @@ async function renderPlan() {
 
 document.addEventListener('change', (e) => {
   const t = e.target;
-  if (t.dataset.have !== undefined) {
-    const have = store('wf-have', {});
-    if (t.checked) have[t.dataset.have] = 1; else delete have[t.dataset.have];
-    save('wf-have', have);
+  if (t.dataset.have !== undefined || t.dataset.owned !== undefined) {
+    const owned = ownedStore();
+    const legacy = store('wf-have', {});
+    const key = t.dataset.have ?? t.dataset.owned;
+    owned[key] = t.dataset.have !== undefined
+      ? (t.checked ? Number(t.dataset.need) || 1 : 0)
+      : Math.max(0, parseInt(String(t.value).replace(/[^0-9]/g, ''), 10) || 0);
+    delete legacy[key];
+    save('wf-owned', owned);
+    save('wf-have', legacy);
     renderPlan();
   } else if (t.dataset.planQ !== undefined) {
     const p = plan();
@@ -761,6 +807,7 @@ document.addEventListener('click', (e) => {
     if (btn.dataset.armed) {
       save('wf-plan', []);
       save('wf-have', {});
+      save('wf-owned', {});
       updatePlanBadge();
       renderPlan();
     } else {

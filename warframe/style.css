@@ -326,7 +326,7 @@ tr.have td { opacity: .45; text-decoration: line-through; }
 .step { padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
 .stage-arrow { flex: none; align-self: center; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 10px solid var(--line); }
 
-.res-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
+.res-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
 .res-tile { display: flex; gap: 8px; align-items: flex-start; padding: 10px; background: var(--panel-2); border: 1px solid var(--line); border-left: 3px solid var(--k-farm); border-radius: 6px; }
 .res-qty { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
 
@@ -382,3 +382,28 @@ tr.have td { opacity: .45; text-decoration: line-through; }
 .res-img { width: 36px; height: 36px; object-fit: contain; flex: none; }
 .side-img { width: 22px; height: 22px; object-fit: contain; flex: none; }
 span.node-img, span.res-img, span.side-img { display: none; }
+
+/* ---------- 보유 수량 ---------- */
+.owned { display: inline-flex; align-items: baseline; gap: 4px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.owned-input {
+  width: 84px;
+  padding: 3px 6px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font: inherit;
+  font-size: 14px;
+  text-align: right;
+}
+.owned.small .owned-input { width: 56px; font-size: 13px; }
+.owned-need { color: var(--muted); font-size: 13px; }
+.farm-head .owned { margin: 0 0 0 auto; }
+.res-body { min-width: 0; flex: 1; }
+.progress.mini { height: 4px; margin: 6px 0 2px; }
+.progress.full i { background: var(--ok); }
+.progress i { background: var(--accent); }
+.ok-text { color: var(--ok); }
+.res-tile.done, .farm-item.done, .node.done { opacity: .55; }
+.owned { white-space: nowrap; }
+.owned-input { width: 72px; }
