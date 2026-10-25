@@ -1,0 +1,574 @@
+{
+"35mm Film": {
+"title": "35mm Film",
+"farm": "• Non-endless missions in Höllvania are recommended since players can explore the tileset after completing the objective."
+},
+"Adlet Core": {
+"title": "Core (Component)"
+},
+"Adramal Alloy": {
+"title": "Adramal Alloy"
+},
+"Adramalium": {
+"title": "Adramalium"
+},
+"Advanced Nosam Cutter": {
+"title": "Mining"
+},
+"Advances Debt-Bond": {
+"title": "Debt-Bond"
+},
+"Aggristone": {
+"title": "Aggristone"
+},
+"Agnovidisc": {
+"title": "Agnovidisc"
+},
+"Air Support Charges": {
+"title": "Air Support Charges",
+"acq": "10x Blueprint\nThe blueprint is automatically available in the Foundry and will craft 10 Charges, but players must possess a Landing Craft Foundry Segment before they can build Air Support Charges.\nManufacturing Requirements\n4,000 | 1,200 | 2,000 | 1 | 700 | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: N/A\n100x Blueprint\nThe reusable blueprints for 100x Air Support Charges can be acquired through research in a Dojo's Tenno Lab\nManufacturing Requirements\n40,000 | 12,000 | 20,000 | 10 | 7,000 | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 15,000\nTenno Lab Research • 3,000\nCredits 10,000 | 5,000 | 5,000 | 150 | 8 | Time: 72 hrs\nPrereq: N/A\nx1 x3 x10 x30 x100"
+},
+"Aksondol": {
+"title": "Aksondol",
+"acq": "Aksondol's blueprints can be purchased from Cephalon Melica on Yuvan Peak, Earth, or the Chrysalith, Zariman Ten Zero, for Entropic Kuva, which are dropped by Entropic Eximus in the Zariman.\nThe main blueprint costs 200, while the barrel and receiver blueprints cost 30 each and the link blueprint costs 60, requiring 380 total.\nManufacturing Requirements 📝 Edit blueprint requirements\n15,000 | 2 | 2 | 1 | | Time: 12 Hour(s)\nRush: 35\nMarket Price: 230 | Blueprints Price:N/A\nBarrel\n10,000 | Polymer Bundle 650 | Entrati Lanthorn 1 | Alloy Plate 1,200 | Cryotic 100 | Time: 6 Hour(s)\nRush: 25\nReceiver\n10,000 | Rubedo 400 | Voidgel Orb 40 | Neurodes 1 | Salvage 900 | Time: 6 Hour(s)\nRush: 25\nLink\n10,000 | Thrax Plasm 50 | Nano Spores 8,200 | Circuits 600 | Ferrite 2,600 | Time: 6 Hour(s)\nRush: 25"
+},
+"Alertfusionbundlelarge": {
+"title": "Alertfusionbundlelarge"
+},
+"Alertfusionbundlemedium": {
+"title": "Alertfusionbundlemedium"
+},
+"Alertfusionbundlesmall": {
+"title": "Alertfusionbundlesmall"
+},
+"Alertrewardfusionbundle": {
+"title": "Alertrewardfusionbundle"
+},
+"Alloy Plate": {
+"title": "Alloy Plate",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nCeres | Gabii | Survival ( Dark Sector ) | 15 - 25 | Grineer Galleon\nCeres | Draco | Survival | 12 - 17 | Grineer Asteroid\nVenus | Tessera | Defense | 3 - 8 | Corpus Outpost\nSedna | Berehynia | Interception | 30 - 40 | Grineer Shipyard\nZariman | Oro Works | Void Armageddon | 50 - 55 | Zariman (Tileset)\nZariman | The Greenway | Mobile Defense | 50 - 55 | Zariman (Tileset)\nZariman | Halako Perimeter | Exterminate | 50 - 55 | Zariman (Tileset)\nZariman | Everview Arc | Void Flood | 50 - 55 | Zariman (Tileset)\nZariman | Tuvul Commons | Void Cascade | 50 - 55 | Zariman (Tileset)"
+},
+"Amarast": {
+"title": "Amarast"
+},
+"Animo Nav Beacon": {
+"title": "Ambulas",
+"farm": "Target | Planet | Name | Type | Level | Tile Set\nPluto | Outer Terminus | Defense | 30 - 40 | Corpus Outpost\nPluto | Regna | Rescue | 34 - 38 | Corpus Outpost\nPluto | Minthe | Mobile Defense | 30 - 34 | Corpus Outpost\nPluto | Narcissus | Exterminate | 32 - 36 | Corpus Outpost"
+},
+"Antiserum Injector Fragment": {
+"title": "Antiserum Injector Fragment",
+"farm": "This only drops from one location, the only Infested Salvage mission in the game.\nTarget | Planet | Name | Type | Level | Tile Set\nEris | Oestrus | Infested Salvage | 34 - 38 | Infested Ship"
+},
+"Argon Burger Meal": {
+"title": "Argon Burger Meal",
+"farm": "• Non-endless missions in Höllvania are recommended since players can explore the tileset after completing the objective. alternatively, enemies do not start spwaning before activating kalymos in legacyte captures, allowing players to explore before completing any objectives and quickly capture the legacyte afterwards"
+},
+"Argon Crystal": {
+"title": "Argon Crystal",
+"farm": "Your thirst for knowledge is as insatiable as mine.\nThese farming locations and tips are based on opinions and may not be 100% true. These should be viewed as advice and not critical facts, and results may vary from player to player.\n• Each map in the Void (except Defense) usually has 2 Argon Deposits, which can give 1-2 Argon Crystals.\n• Affected by Resource Boosters and Resourceful Retriever.\n• Limbo's Cataclysm and Xaku's The Vast Untime can break objects over large distances with high Ability Range and do not require Line of Sight.\nTarget | Planet | Name | Type | Level | Tile Set\nVoid | Teshub | Exterminate | 10 - 15 | Orokin Tower\nVoid | Hepit | Capture | 10 - 15 | Orokin Tower\nVoid | Ani | Survival | 20 - 25 | Orokin Tower\nVoid | Stribog | Sabotage | 20 - 25 | Orokin Tower\nVoid | Ukko | Capture | 30 - 35 | Orokin Tower\nVoid | Oxomoco | Exterminate | 30 - 35 | Orokin Tower\nVoid | Mot | Survival | 40 - 45 | Orokin Tower\nVoid | Marduk | Sabotage | 40 - 45 | Orokin Tower"
+},
+"Ascaris Prime": {
+"title": "Ascaris Prime"
+},
+"Asterite": {
+"title": "Asterite"
+},
+"Atmo Systems": {
+"title": "Atmo Systems"
+},
+"Atramentum": {
+"title": "Atramentum"
+},
+"Aucrux Capacitors": {
+"title": "Aucrux Capacitors"
+},
+"Auron": {
+"title": "Auron"
+},
+"Axidite": {
+"title": "Axidite"
+},
+"Axidrol Alloy": {
+"title": "Axidrol Alloy"
+},
+"Aya": {
+"title": "Aya"
+},
+"Ayatan Amber Star": {
+"title": "Ayatan Star",
+"acq": "• Kuakas and other wildlife in the Plains of Eidolon may drop Stars.\n• They have a rare chance to drop from destroying Storage Containers or opening resource lockers.\n• Including storage containers in Archwing missions, and althougth there will be no animation you are still able to aquire the star should you position yourself close enough.\n• Ayatan Amber Star is a potential common-tier reward from opening Requiem Relics (though not Requiem Eterna).\n• Some bounties in the Cambion Drift can reward a single Ayatan Amber Star for completing a stage.\nAs of Update 24.0 (2018-11-08), a reusable Ayatan Amber Star blueprint can be acquired for 10 Vitus Essence from the Arbiters of Hexis room in any Relay.\nManufacturing Requirements\n100,000 | 2 | 1 | | | Time: 1 hrs\nRush: 2 Platinum 2\nMarket Price: N/A | Blueprints Price: N/A"
+},
+"Azurite": {
+"title": "Azurite"
+},
+"Bapholite": {
+"title": "Bapholite"
+},
+"Basmu": {
+"title": "Basmu",
+"acq": "• Basmu's blueprint is obtainable from limited-time events:\n• Basmu was first introduced in Operation: Scarlet Spear, purchasable from Little Duck for 15,000 Scarlet Credits.\n• Operation: Orphix Venom sold Basmu's blueprint from Father for 1,500 Phasic Cells.\n• The October 2021, 2022, 2023, 2024, 2025, and 2026 Nights of Naberus sold and currently sell Basmu's blueprint from Daughter for 125 Mother Tokens.\n• The blueprint can be traded between players.\n• Operation: Gargoyle's Cry sold Basmu's blueprint from Vigil Jahu Gargoyle for 3 Grotesque Splinter.\n• Operation: Belly of the Beast sold Basmu's blueprint from Ordis for 15 Volatile Motes. Has a purchase limit of 1.\n• Operation: Eight Claw sold Basmu's blueprint from Dominus Thrax for 9 Dominus Aureus. Has a purchase limit of 1.\n• Operation: Blood of Perita sold Basmu's blueprint from Roathe for 20 Marks of Valiance. Has no purchase limit.\n• Epoch Operation: Taubound is currently selling Basmu's blueprint from Praghasa for 125 Moonflesh. Has no purchase limit.\nManufacturing Requirements 📝 Edit blueprint requirements\n25,000 | Titanium 1,500 | Carbides 800 | Isos 450 | Nullstones 1 | Time: 1 Day(s)\nRush: 35\nMarket Price: N/A | Blueprints Price:N/A"
+},
+"Beating Heartstrings": {
+"title": "Beating Heartstrings",
+"farm": "Your thirst for knowledge is as insatiable as mine.\nThese farming locations and tips are based on opinions and may not be 100% true. These should be viewed as advice and not critical facts, and results may vary from player to player.\nTarget | Planet | Name | Type | Level | Tile Set\nHöllvania | Solstice Square | Stage Defense | 65 - 70 | Höllvania"
+},
+"Bellow Voca": {
+"title": "Bellow Voca",
+"farm": "Target | Planet | Name | Type | Level | Tile Set\nDeimos | Nex | Exterminate | 55 - 60 | Albrecht's Laboratories\nDeimos | Effervo | Assassination | 55 - 60 | Albrecht's Laboratories\n• Non-endless missions in the Albrecht's Laboratories are recommended since players can explore the tileset after completing the objective. The Exterminate mission Nex is particularly effective as the player is naturally forced to maneuver a significant portion of the map."
+},
+"Bhaira Hound": {
+"title": "Hound (Companion)"
+},
+"Big Bytes Pizza": {
+"title": "Big Bytes Pizza"
+},
+"Bioplasma": {
+"title": "Jade Shadows"
+},
+"Bonewidow Capsule": {
+"title": "Bonewidow Capsule"
+},
+"Bonewidow Casing": {
+"title": "Bonewidow Casing"
+},
+"Bonewidow Engine": {
+"title": "Bonewidow Engine"
+},
+"Bonewidow Weapon Pod": {
+"title": "Bonewidow Weapon Pod"
+},
+"Bracoid": {
+"title": "Bracoid"
+},
+"Braton": {
+"title": "Braton",
+"acq": "A fully built Braton can be purchased from the Market for 25,000 Credits 25,000.\nIt can be sold for 7,500 Credits 7,500."
+},
+"Calda Toroid": {
+"title": "Calda Toroid"
+},
+"Carbides": {
+"title": "Carbides"
+},
+"Cela Bracket": {
+"title": "Hound (Companion)"
+},
+"Cephalite Resonance": {
+"title": "Cephalite Resonance"
+},
+"Ceramic Dagger": {
+"title": "Ceramic Dagger",
+"acq": "The Ceramic Dagger's blueprint can be bought from Nightwave Offerings for 50x Cred\nManufacturing Requirements 📝 Edit blueprint requirements\n15,000 | Gallium 4 | Ferrite 500 | Alloy Plate 500 | Polymer Bundle 600 | Time: 12 Hour(s)\nRush: 25\nMarket Price: N/A | Blueprints Price:N/A"
+},
+"Cerulean Fungus Extract": {
+"title": "Cerulean Fungus Extract"
+},
+"Ceti Lacera": {
+"title": "Ceti Lacera",
+"acq": "• Ceti Lacera's blueprint is obtainable from limited-time events:\n• Ceti Lacera was first introduced in Operation: Scarlet Spear, purchasable from Little Duck for 20,000 Scarlet Credits.\n• Operation: Orphix Venom sold Ceti Lacera's blueprint from Father for 2,000 Phasic Cells.\n• Operation: Gargoyle's Cry sold Ceti Lacera's blueprint from Vigil Jahu Gargoyle for 3 Grotesque Splinter.\n• The October 2021, 2022, 2023, 2024, 2025, and 2026 Nights of Naberus sold Ceti Lacera's blueprint from Daughter for 125 Mother Tokens.\n• Operation: Belly of the Beast sold Ceti Lacera's blueprint from Ordis for 15 Volatile Motes. Has a purchase limit of 1.\n• Operation: Eight Claw sold Ceti Lacera's blueprint from Dominus Thrax for 9 Dominus Aureus. Has a purchase limit of 1.\n• Operation: Blood of Perita sold Ceti Lacera's blueprint from Roathe for 20 Marks of Valiance. Has a purchase limit of 1.\n• The blueprint can be traded between players.\nManufacturing Requirements 📝 Edit blueprint requirements\n25,000 | Salvage 8,150 | Oxium 400 | Rubedo 5,950 | Morphics 15 | Time: 1 Day(s)\nRush: 35\nMarket Price: N/A | Blueprints Price:N/A"
+},
+"Cetus Wisp": {
+"title": "Cetus Wisp"
+},
+"Cetustieraendocommon": {
+"title": "Cetustieraendocommon"
+},
+"Cetustieraendouncommon": {
+"title": "Cetustieraendouncommon"
+},
+"Cetustierbendocommon": {
+"title": "Cetustierbendocommon"
+},
+"Cetustierbendouncommon": {
+"title": "Cetustierbendouncommon"
+},
+"Cetustiercendouncommon": {
+"title": "Cetustiercendouncommon"
+},
+"Cetustierdendouncommon": {
+"title": "Cetustierdendouncommon"
+},
+"Cheddar Crowns Cereal": {
+"title": "Cheddar Crowns Cereal",
+"farm": "• Non-endless missions in Höllvania are recommended since players can explore the tileset after completing the objective."
+},
+"Chroma": {
+"title": "Chroma",
+"acq": ""
+},
+"Chuggin' Along Sixpack": {
+"title": "Chuggin' Along Sixpack",
+"farm": "• Non-endless missions in Höllvania are recommended since players can explore the tileset after completing the objective."
+},
+"Cinta": {
+"title": "Cinta",
+"acq": ""
+},
+"Circuitrepeatablenormalfusionbundle": {
+"title": "Circuitrepeatablenormalfusionbundle"
+},
+"Circuitrepeatablesteelpathfusionbundle": {
+"title": "Circuitrepeatablesteelpathfusionbundle"
+},
+"Circuits": {
+"title": "Circuits",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nCeres | Seimeni | Defense ( Dark Sector ) | 15 - 25 | Grineer Shipyard\nVenus | Tessera | Defense | 3 - 8 | Corpus Outpost\nCeres | Gabii | Survival ( Dark Sector ) | 15 - 25 | Grineer Galleon\nVenus | Romula | Defense ( Dark Sector ) | 8 - 18 | Corpus Outpost\nVenus | Malva | Survival ( Dark Sector ) | 8 - 18 | Corpus Ship"
+},
+"Circuitsilvernormalfusionbundle": {
+"title": "Circuitsilvernormalfusionbundle"
+},
+"Circuitsilversteelpathfusionbundle": {
+"title": "Circuitsilversteelpathfusionbundle"
+},
+"Clan Key": {
+"title": "Clan Key",
+"acq": "Upon starting or joining a Clan, the blueprint for the Clan Key will be automatically added to the player's inventory and made available within the Foundry. The blueprint will be consumed during construction, but once claimed, the key remains present in the player's inventory, granting them Dojo access.\nIf a player leaves or disbands the clan, the key will be automatically destroyed, but upon joining a new clan, a new blueprint will be provided, resulting in an identical process for gaining access to the new clan's Dojo.\nManufacturing Requirements\n1,500 | 1 | 500 | 500 | | Time: 12 hrs\nRush: 10 Platinum 10\nMarket Price: N/A | Blueprints Price: N/A"
+},
+"Commonfusionbundle": {
+"title": "Commonfusionbundle"
+},
+"Condroc Wing": {
+"title": "Condroc Wing"
+},
+"Connla Sprout": {
+"title": "Connla Sprout"
+},
+"Control Module": {
+"title": "Control Module",
+"farm": "Your thirst for knowledge is as insatiable as mine.\nThese farming locations and tips are based on opinions and may not be 100% true. These should be viewed as advice and not critical facts, and results may vary from player to player.\nTarget | Planet | Name | Type | Level | Tile Set\nVoid | Teshub | Exterminate | 10 - 15 | Orokin Tower\nVoid | Hepit | Capture | 10 - 15 | Orokin Tower"
+},
+"Copernics": {
+"title": "Copernics"
+},
+"Coprun": {
+"title": "Coprun"
+},
+"Corpus Cipher": {
+"title": "Corpus Cipher"
+},
+"Corpus Datamass": {
+"title": "Corpus Datamass"
+},
+"Corrupted Bombard Specter": {
+"title": "Specter"
+},
+"Corrupted Lancer Specter": {
+"title": "Corrupted Lancer Specter"
+},
+"Cortege Barrel": {
+"title": "Cortege"
+},
+"Cortege Receiver": {
+"title": "Cortege"
+},
+"Cortege Stock": {
+"title": "Cortege"
+},
+"Cortichrome": {
+"title": "Jade Shadows"
+},
+"Crimson Talent": {
+"title": "Crimson Talent"
+},
+"Crimzian": {
+"title": "Crimzian"
+},
+"Crisma Toroid": {
+"title": "Crisma Toroid"
+},
+"Cryotic": {
+"title": "Cryotic",
+"farm": "Your thirst for knowledge is as insatiable as mine.\nThese farming locations and tips are based on opinions and may not be 100% true. These should be viewed as advice and not critical facts, and results may vary from player to player.\nTarget | Planet | Name | Type | Level | Tile Set\nEarth | Everest | Excavation | 1 - 6 | Grineer Forest\nEuropa | Valefor | Excavation | 18 - 23 | Corpus Ice Planet\nPluto | Hieracon | Excavation ( Dark Sector ) | 35 - 45 | Corpus Outpost\nNeptune | Despina | Excavation | 27 - 32 | Corpus Outpost\nVenus | Kiliken | Excavation | 3 - 8 | Corpus Outpost\nMars | Augustus | Excavation | 9 - 14 | Grineer Settlement"
+},
+"Cryptographic Alu": {
+"title": "Cryptographic Alu"
+},
+"Cubic Diodes": {
+"title": "Cubic Diodes"
+},
+"Curse Of Hearing": {
+"title": "Curse Of Hearing"
+},
+"Curse Of Knowing": {
+"title": "Curse Of Knowing"
+},
+"Curse Of Seeing": {
+"title": "Curse Of Seeing"
+},
+"Cuthol Bait": {
+"title": "Fishing"
+},
+"Dagonic": {
+"title": "Dagonic"
+},
+"Damaged Necramech Casing": {
+"title": "Damaged Necramech Casing"
+},
+"Damaged Necramech Engine": {
+"title": "Damaged Necramech Engine"
+},
+"Damaged Necramech Pod": {
+"title": "Damaged Necramech Pod"
+},
+"Damaged Necramech Weapon Barrel": {
+"title": "Damaged Necramech Weapon Barrel"
+},
+"Damaged Necramech Weapon Pod": {
+"title": "Damaged Necramech Weapon Pod"
+},
+"Damaged Necramech Weapon Receiver": {
+"title": "Damaged Necramech Weapon Receiver"
+},
+"Damaged Necramech Weapon Stock": {
+"title": "Damaged Necramech Weapon Stock"
+},
+"Dark Dagger": {
+"title": "Dark Dagger",
+"acq": "The Dark Dagger's blueprint can be bought from Nightwave Offerings for 50x Cred\nManufacturing Requirements 📝 Edit blueprint requirements\n15,000 | Neurodes 2 | Ferrite 500 | Plastids 500 | Polymer Bundle 300 | Time: 12 Hour(s)\nRush: 25\nMarket Price: N/A | Blueprints Price:N/A"
+},
+"Dark Sword": {
+"title": "Dark Sword",
+"acq": "The Dark Sword's blueprint can be bought from Nightwave Offerings for 50x Cred\nManufacturing Requirements 📝 Edit blueprint requirements\n20,000 | Neurodes 2 | Ferrite 800 | Plastids 200 | Polymer Bundle 75 | Time: 12 Hour(s)\nRush: 25\nMarket Price: N/A | Blueprints Price:N/A"
+},
+"Daughter Token": {
+"title": "Daughter Token"
+},
+"Deepspacecommonavionicsendo": {
+"title": "Deepspacecommonavionicsendo"
+},
+"Deepspaceuncommonavionicsendo": {
+"title": "Deepspaceuncommonavionicsendo"
+},
+"Dera Vandal": {
+"title": "Dera Vandal",
+"acq": "Blueprints and components are a potential Invasion reward. All components can be traded, although players must have a Mastery Rank of at least 7 to acquire the blueprint.\nManufacturing Requirements 📝 Edit blueprint requirements\n25,000 | 1 | 1 | 1 | | Time: 12 Hour(s)\nRush: 50\nMarket Price: N/A | Blueprints Price:N/A"
+},
+"Detonite Ampule": {
+"title": "Detonite Ampule",
+"farm": "Your thirst for knowledge is as insatiable as mine.\nThese farming locations and tips are based on opinions and may not be 100% true. These should be viewed as advice and not critical facts, and results may vary from player to player.\nTarget | Planet | Name | Type | Level | Tile Set\nSaturn | Piscinas | Survival ( Dark Sector ) | 26 - 36 | Grineer Asteroid\nCeres | Gabii | Survival ( Dark Sector ) | 15 - 25 | Grineer Galleon"
+},
+"Detonite Injector": {
+"title": "Detonite Injector"
+},
+"Devar": {
+"title": "Devar"
+},
+"Devolved Namalon": {
+"title": "Devolved Namalon"
+},
+"Distilling Extractor Prime": {
+"title": "Extractor"
+},
+"Dominus Aureus": {
+"title": "Dominus Aureus"
+},
+"Dorma Hound": {
+"title": "Hound (Companion)"
+},
+"Dracroot": {
+"title": "Dracroot"
+},
+"Dual Viciss": {
+"title": "Dual Viciss",
+"acq": "Dual Viciss's blueprints can be purchased from Minerva of The Hex for Standing Standing Standing; 2 copies of the component blueprints for 5,000 Standing 5,000 each and the main blueprint for 15,000 Standing 15,000 to a total of 35,000 Standing 35,000, all requiring Rank 5 - Pizza Party.\nThis weapon is also part of the Scaldra Dominance Pack for 655 Platinum 655.\nManufacturing Requirements 📝 Edit blueprint requirements\n20,000 | 2 | 2 | | | Time: 12 Hour(s)\nRush: 25\nMarket Price: 190 | Blueprints Price:N/A\nBlade\n20,000 | Efervon Sample 200 | Techrot Chitin 30 | Techrot Motherboard 10 | Alloy Plate 1,300 | Time: 12 Hour(s)\nRush: 25\nHilt\n20,000 | Experimental Arc-Relay 30 | Ferrite 1,300 | Salvage 2,200 | Gallium 10 | Time: 12 Hour(s)\nRush: 25"
+},
+"Dusklight Sarracenia": {
+"title": "Dusklight Sarracenia",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resources until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nCeres | Pallas | Exterminate | 12 - 14 | Grineer Shipyard\nCeres | Ker | Sabotage | 14 - 16 | Grineer Shipyard"
+},
+"Earthcommonavionicsendo": {
+"title": "Earthcommonavionicsendo"
+},
+"Earthuncommonavionicsendo": {
+"title": "Earthuncommonavionicsendo"
+},
+"Echo Voca": {
+"title": "Echo Voca",
+"farm": "Target | Planet | Name | Type | Level | Tile Set\nDeimos | Nex | Exterminate | 55 - 60 | Albrecht's Laboratories\nDeimos | Effervo | Assassination | 55 - 60 | Albrecht's Laboratories\n• Non-endless missions in the Albrecht's Laboratories are recommended since players can explore the tileset after completing the objective. The Exterminate mission Nex is particularly effective as the player is naturally forced to maneuver a significant portion of the map."
+},
+"Echoes Of Umbra": {
+"title": "Echoes Of Umbra"
+},
+"Eevani": {
+"title": "Eevani"
+},
+"Efervon Sample": {
+"title": "Efervon Sample",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven."
+},
+"Efv-5 Jupiter": {
+"title": "Efv-5 Jupiter"
+},
+"Efv-8 Mars": {
+"title": "Efv-8 Mars"
+},
+"Eidolon Madurai Lens": {
+"title": "Focus Lens"
+},
+"Eidolon Naramon Lens": {
+"title": "Focus Lens"
+},
+"Eidolon Unairu Lens": {
+"title": "Focus Lens"
+},
+"Eidolon Vazarin Lens": {
+"title": "Focus Lens"
+},
+"Eidolon Zenurik Lens": {
+"title": "Focus Lens"
+},
+"Elementary, My Dear": {
+"title": "Elementary, My Dear"
+},
+"Elitealertfusionbundlelarge": {
+"title": "Elitealertfusionbundlelarge"
+},
+"Elitealertfusionbundlemedium": {
+"title": "Elitealertfusionbundlemedium"
+},
+"Elitealertfusionbundlesmall": {
+"title": "Elitealertfusionbundlesmall"
+},
+"Embolos": {
+"title": "Embolos"
+},
+"Emerald Talent": {
+"title": "Emerald Talent"
+},
+"Endojackpotbundle": {
+"title": "Endojackpotbundle"
+},
+"Enigma Gyrum": {
+"title": "Enigma Gyrum"
+},
+"Entrati Lanthorn": {
+"title": "Entrati Lanthorn",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nZariman | Halako Perimeter | Exterminate | 50 - 55 | Zariman (Tileset)\nZariman | The Greenway | Mobile Defense | 50 - 55 | Zariman (Tileset)"
+},
+"Entrati Obols": {
+"title": "Entrati Obols",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nDeimos | Persto | Survival | 55 - 60 | Albrecht's Laboratories\nDeimos | Cambire | Alchemy | 55 - 60 | Albrecht's Laboratories"
+},
+"Entratifragmentbase": {
+"title": "Entratifragmentbase"
+},
+"Entratilabdogtag": {
+"title": "Entratilabdogtag"
+},
+"Entropic Kuva": {
+"title": "Entropic Kuva",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nZariman | Everview Arc | Void Flood | 50 - 55 | Zariman (Tileset)\nZariman | Halako Perimeter | Exterminate | 50 - 55 | Zariman (Tileset)\nZariman | Oro Works | Void Armageddon | 50 - 55 | Zariman (Tileset)\nZariman | The Greenway | Mobile Defense | 50 - 55 | Zariman (Tileset)\nZariman | Tuvul Commons | Void Cascade | 50 - 55 | Zariman (Tileset)"
+},
+"Equinox": {
+"title": "Equinox",
+"acq": ""
+},
+"Esher Devar": {
+"title": "Esher Devar"
+},
+"Evergreenloginrewardfusionbundle": {
+"title": "Evergreenloginrewardfusionbundle"
+},
+"Excalibur Umbra": {
+"title": "Excalibur/Umbra",
+"acq": "The blueprint for Excalibur Umbra is given to players upon completing the first mission of The Sacrifice quest, and the ability to build the Warframe is granted on completing the second mission. Unlike other Warframes, Umbra requires no further components and is crafted entirely from the single blueprint. However, even after being crafted, he cannot be used until the penultimate mission, where he is automatically Rank 30 with a free, pre-installed Orokin Reactor and Warframe slot.\nA second blueprint will not be given on replays. Also unlike other quest-tied Warframes, Cephalon Simaris does not sell Excalibur Umbra blueprints. Thus the player can only own one copy of Excalibur Umbra.\nManufacturing Requirements\n10,000 | 1 | 60 | 1,200 | 1,600 | Time: 10 s\nRush: 0 Platinum 0\nMarket Price: N/A | Blueprints Price: N/A"
+},
+"Exceptional Sentient Core": {
+"title": "Sentient Core",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven.\n• Eidolon Hunts are the best for farming all types of Sentient Cores.\n• Vomvalysts guarantee one Intact Sentient Core per kill.\n• Eidolon Lures, when self-destruction occurs, will drop varying amounts based on the type Eidolon captured.\n• Eidolon Teralyst dropping the least Cores.\n• Eidolon Hydrolyst dropping the most Cores.\n• Although not as efficient, Archon Hunts are a great location to farm Intact Sentient Cores whilst completing the objective, preferably interception or defense mission types."
+},
+"Exemplar Granum Crown": {
+"title": "Granum Crown"
+},
+"Experimental Arc-Relay": {
+"title": "Experimental Arc-Relay",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven."
+},
+"Faithful Void Offering": {
+"title": "Faithful Void Offering",
+"acq": "The Faithful Void Offering could be purchased for 10,000 Credits 10,000 from the Market, found under Equipment, subsection Gear. However, it was discontinued after the event officially ended.\n• Void Offerings were mistakenly released prior to the event as reusable blueprints, rather than individual charges. Though these are noticeably more costly, players who purchased these blueprints can continue to craft charges despite the event's conclusion."
+},
+"Familial Debt-Bond": {
+"title": "Debt-Bond"
+},
+"Father Token": {
+"title": "Father Token"
+},
+"Ferros": {
+"title": "Ferros"
+},
+"Feverspine": {
+"title": "Feverspine",
+"acq": "The blueprint can be acquired by completing the K-Drive Race \"Dead Drop\" on the Cambion Drift. Note: Active races rotate on a daily basis and thus it is not available every day.\nBlueprints can be reacquired by repeating the relevant race after the blueprint is sold or consumed. Possessing a completed component, or a K-Drive containing the component, does not prevent acquiring its blueprint again."
+},
+"Fieldron": {
+"title": "Fieldron"
+},
+"Fieldron Sample": {
+"title": "Fieldron Sample",
+"farm": "Your thirst for knowledge is as insatiable as mine.\nThese farming locations and tips are based on opinions and may not be 100% true. These should be viewed as advice and not critical facts, and results may vary from player to player.\nTarget | Planet | Name | Type | Level | Tile Set\nNeptune | Kelashin | Survival ( Dark Sector ) | 30 - 40 | Infested Ship\nMars | Wahiba | Survival ( Dark Sector ) | 10 - 20 | Corpus Ship\nMars | Kadesh | Defense ( Dark Sector ) | 10 - 20 | Grineer Settlement"
+},
+"Flawless Sentient Core": {
+"title": "Sentient Core",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven.\n• Eidolon Hunts are the best for farming all types of Sentient Cores.\n• Vomvalysts guarantee one Intact Sentient Core per kill.\n• Eidolon Lures, when self-destruction occurs, will drop varying amounts based on the type Eidolon captured.\n• Eidolon Teralyst dropping the least Cores.\n• Eidolon Hydrolyst dropping the most Cores.\n• Although not as efficient, Archon Hunts are a great location to farm Intact Sentient Cores whilst completing the objective, preferably interception or defense mission types."
+},
+"Focused Nosam Cutter": {
+"title": "Mining"
+},
+"Frak Stabilizer": {
+"title": "Frak Stabilizer"
+},
+"Fresnels": {
+"title": "Fresnels"
+},
+"Frostcap": {
+"title": "Frostcap"
+},
+"Frostleaf": {
+"title": "Frostleaf",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resources until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nPluto | Regna | Rescue | 34 - 38 | Corpus Outpost\nVenus | Linea | Rescue | 5 - 7 | Corpus Outpost\nNeptune | Galatea | Capture | 27 - 29 | Corpus Outpost\nVenus | E Gate | Exterminate | 3 - 5 | Corpus Outpost\nVenus | Venera | Capture | 5 - 7 | Corpus Outpost"
+},
+"Gallium": {
+"title": "Gallium",
+"acq": "By purchasing this item you can directly exchange 10 Platinum 10 for 1 Gallium.—In-Game Description\nBeginning in Update 9.0 (2013-07-13) materials could be purchased directly from the market for Platinum.",
+"farm": "Your thirst for knowledge is as insatiable as mine.\nThese farming locations and tips are based on opinions and may not be 100% true. These should be viewed as advice and not critical facts, and results may vary from player to player.\nTarget | Planet | Name | Type | Level | Tile Set\nMars | Hellas | Exterminate | 8 - 10 | Grineer Settlement\nMars | Gradivus | Sabotage | 9 - 11 | Corpus Ship\nMars | Ara | Capture | 10 - 12 | Grineer Settlement\nUranus | Titania | Assassination | 27 - 29 | Grineer Sealab"
+},
+"Gallos Rods": {
+"title": "Gallos Rods"
+},
+"Ganglion": {
+"title": "Ganglion"
+},
+"Garmr Core": {
+"title": "Garmr Core"
+},
+"Genericdojocolorpigment": {
+"title": "Genericdojocolorpigment"
+},
+"Ghost Brush Extract": {
+"title": "Ghost Brush Extract"
+},
+"Glaive": {
+"title": "Glaive",
+"acq": "The Glaive's blueprint can be bought from Nightwave Offerings for 50x Cred\nThe Glaive as well as the Glaive Obsidian Skin was formerly obtainable to all PlayStation Plus members as part of the original PlayStation Plus starter pack.\nManufacturing Requirements 📝 Edit blueprint requirements\n15,000 | Morphics 10 | Ferrite 5,000 | Nano Spores 6,000 | Salvage 4,500 | Time: 12 Hour(s)\nRush: 35\nMarket Price: 150 | Blueprints Price:N/A\nThis weapon can be sold for 5,000 Credits 5,000."
+},
+"Glappid Bait": {
+"title": "Fishing"
+},
+"Goblite": {
+"title": "Goblite"
+},
+"Gorgaricus Spore": {
+"title": "Gorgaricus Spore"
+},
+"Grandmother Token": {
+"title": "Grandmother Token"
+},
+"Granum Crown": {
+"title": "Granum Crown"
+},
+"Grendel": {
+"title": "Grendel",
+"acq": ""
+}
+}

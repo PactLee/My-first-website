@@ -19,10 +19,13 @@ import json
 import os
 import re
 import sys
+import urllib.parse
 from collections import defaultdict
 
 SRC = sys.argv[1] if len(sys.argv) > 1 else "package/data/json"
 PEP = sys.argv[2] if len(sys.argv) > 2 else None  # warframe-public-export-plus 폴더 (선택)
+# fetch_wiki.py 로 모은 WARFRAME 위키 발췌 (선택)
+WIKI = sys.argv[3] if len(sys.argv) > 3 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "wiki_extract.json")
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
 
 IMG_BASE = "https://cdn.warframestat.us/img/"
@@ -824,6 +827,130 @@ for u in order:
     if rec["c"] in ("resources", "misc") and known:
         if rec.get("ga", {}).get("m") == "정제" or "획득 가능 장소" not in rec.get("d", ""):
             rec["mk"] = 1
+
+# ---------------------------------------------------------------------------
+# 4-4) WARFRAME 위키 보강: 획득 방법(Acquisition), 추천 파밍 장소(Farming Locations)
+# ---------------------------------------------------------------------------
+wiki = {}
+if WIKI and os.path.exists(WIKI):
+    with open(WIKI, encoding="utf-8") as f:
+        wiki = json.load(f)
+
+# 영어 원문 키워드 → 한국어 안내 (공식 번역이 확인된 용어는 그대로 사용)
+ACQ_LABELS = [
+    (r"Kuva Lich", "쿠바 리치 처치"),
+    (r"Sisters? of Parvos|\bSister\b", "파보스의 자매들"),
+    (r"Baro Ki.?Teer", "바로 키'티어"),
+    (r"Prime Resurgence|Varzia", "프라임 리서전스(Varzia)"),
+    (r"Nightwave", "나이트웨이브"),
+    (r"Invasion", "침공 보상"),
+    (r"Tenno Lab|Bio Lab|Chem Lab|Energy Lab|Orokin Lab|Clan Dojo|\bDojo\b|research", "클랜 도장 연구"),
+    (r"Daily Tribute|login reward", "출석 보상"),
+    (r"Arbitration", "중재 보상"),
+    (r"Steel Path", "강철의 길"),
+    (r"Cephalon Simaris", "세팔론 시마리스"),
+    (r"Ergo Glast", "에르고 글래스트"),
+    (r"Teshin|Conclave", "콘클레이브"),
+    (r"Sortie", "출격 보상"),
+    (r"Archon Hunt", "집정관 사냥"),
+    (r"Netracell", "네트라셀"),
+    (r"The Circuit|Duviri", "두비리·순환로"),
+    (r"Railjack", "레일잭"),
+    (r"\bquests?\b", "퀘스트 보상"),
+    (r"\b(event|operation)s?\b", "이벤트(종료되었을 수 있음)"),
+    (r"starter|starting|Vor's Prize|Awakening", "시작 장비·초반 퀘스트"),
+    (r"Cephalon Melica", "Cephalon Melica 상점"),
+    (r"\bMarket\b", "시장"),
+    (r"\bdrop(s|ped)?\b", "드랍(적·컨테이너 등)"),
+    (r"\bbount", "의뢰"),
+    (r"\bRelic", "성유물"),
+    (r"\btrad(e|ed|ing|able)\b", "플레이어 거래"),
+]
+
+
+BOX_LINE = re.compile(r"Manufacturing Requirements|Edit blueprint|^Rush:|Market Price|Blueprints? Price|^Time:|^[\d,.\s]+$|📝|Sell Price", re.I)
+
+
+def acq_info(text):
+    # 위키의 제작 요구사항 상자(가격·시간 표)는 획득 방법이 아니므로 뺀다
+    text = "\n".join(ln for ln in text.split("\n") if not BOX_LINE.search(ln.strip("• ").strip()))
+    hits = []
+    for pat, label in ACQ_LABELS:
+        m = re.search(pat, text, flags=re.I)
+        if m and label not in [h[1] for h in hits]:
+            hits.append((m.start(), label))
+    labels = [h[1] for h in sorted(hits)[:4]]
+    # 원문 앞부분 2문장 정도 (출처 표시와 함께 보여준다)
+    body = " ".join(ln for ln in text.split("\n") if "|" not in ln)
+    sents = re.split(r"(?<=[.!?])\s+", body.strip())
+    return labels, " ".join(sents[:2])[:400]
+
+
+def tr_mtype(text):
+    text = re.sub(r"\(\s*", "(", re.sub(r"\s*\)", ")", text)).strip()
+    m = re.match(r"^(.*?)\s*\((.+)\)$", text)
+    main, sub = (m.group(1), m.group(2)) if m else (text, None)
+    k = MISSION_KO.get(main) or MISSION_KO.get(main.title()) or pep_upper.get(main.upper()) or main
+    if sub:
+        k += f" ({pep_upper.get(sub.upper(), sub)})"
+    return k
+
+
+def farm_rows(text):
+    rows = []
+    for ln in text.split("\n"):
+        cells = [c.strip() for c in ln.split("|")]
+        if len(cells) < 4 or cells[0] in ("Target", "Planet"):
+            continue
+        planet, node, mtype, level = cells[0], cells[1], cells[2], cells[3]
+        pk = planet_ko.get(planet) or pep_text.get(planet)
+        if not pk or not node:
+            continue
+        mk = tr_mtype(mtype)
+        rows.append([pk, node, mk, level, f"{pk}/{node} ({mk})"])
+    return rows[:10]
+
+
+def farm_tips(text):
+    tips = []
+    for ln in text.split("\n"):
+        ln = ln.strip("• ").strip()
+        if "|" in ln or not ln or ln.startswith("These are based on opinions"):
+            continue
+        tips.append(ln[:240])
+    return tips[:3]
+
+
+wiki_hits = {"acq": 0, "farm": 0}
+for u in order:
+    rec = records[index_of[u]]
+    w = wiki.get(rec["e"])
+    if not w:
+        continue
+    url = "https://wiki.warframe.com/w/" + urllib.parse.quote((w.get("title") or rec["e"]).replace(" ", "_"))
+    if w.get("acq"):
+        labels, excerpt = acq_info(w["acq"])
+        if labels or excerpt:
+            rec["wa"] = {"k": labels, "t": excerpt, "u": url}
+            wiki_hits["acq"] += 1
+            if rec.get("nb") and labels and not rec["e"].startswith(("Kuva ", "Tenet ")):
+                bp_obtainable = re.search(r"blueprint", excerpt, re.I) and [x for x in labels if x != "플레이어 거래"]
+                if bp_obtainable and rec.get("b"):
+                    # 위키에 설계도를 얻는 방법이 있으면 제작 대상으로 되돌린다
+                    del rec["nb"]
+                    rec.pop("note", None)
+                    bp = bp_row(rec["b"])
+                    if bp is not None and not (bp.get("dr") or bp.get("src") or bp.get("how")):
+                        bp["how"] = "위키 기준 설계도 획득: " + ", ".join(x for x in labels if x != "플레이어 거래")
+                    wiki_hits["bp"] = wiki_hits.get("bp", 0) + 1
+                else:
+                    rec["note"] = "위키 기준 획득 방법: " + ", ".join(labels) + ". 일반 제작으로는 얻을 수 없습니다."
+    if w.get("farm"):
+        rows, tips = farm_rows(w["farm"]), farm_tips(w["farm"])
+        if rows or tips:
+            rec["wf"] = {"r": rows, "t": tips, "u": url}
+            wiki_hits["farm"] += 1
+print(f"위키 보강: 획득 방법 {wiki_hits['acq']}개 (설계도 획득처 복구 {wiki_hits.get('bp', 0)}개), 추천 파밍 장소 {wiki_hits['farm']}개")
 
 # 물고기 → 분해해서 나오는 부위
 for u in order:

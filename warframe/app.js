@@ -238,6 +238,16 @@ function gatherBlock(ga, rec) {
     <p class="muted">게임 내 공식 설명(아이템·미끼·작살 설명문)에서 정리한 정보입니다. 핫스팟 위치 등 자세한 지도는 위키를 참고하세요.</p>`;
 }
 
+// 위키 추천 파밍 장소: [행성, 노드, 미션, 레벨, 장소 키]
+function wikiFarm(wf) {
+  const rows = wf.r.length ? `<table><thead><tr><th>행성</th><th>노드</th><th>미션</th><th class="num">레벨</th></tr></thead><tbody>
+    ${wf.r.map((r) => `<tr><td>${esc(r[0])}</td><td>${locLink(r[4]).replace(`>${esc(r[4])}<`, `>${esc(r[1])}<`)}</td><td>${esc(r[2])}</td><td class="num">${esc(r[3])}</td></tr>`).join('')}
+    </tbody></table>` : '';
+  const tips = wf.t.length ? `<ul class="wiki-tips">${wf.t.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
+  return `<h2>위키 추천 파밍 장소</h2>${rows}${tips}
+    <p class="r-sub">위키 사용자들의 추천이며 정확한 확률은 아닙니다. 팁은 영어 원문입니다. 출처: <a href="${esc(wf.u)}" target="_blank" rel="noopener">WARFRAME Wiki</a> (CC BY-SA)</p>`;
+}
+
 function dropShort(d) {
   const vt = d[4] && d[4].vt ? ' <span class="tag vault">볼트됨</span>' : '';
   return `${esc(d[0])} <span class="muted">${pct(d[1])}</span>${vt}`;
@@ -386,6 +396,7 @@ async function renderDetail(id) {
   if (rec.b && !rec.nb && !rec.bp && rec.b.l.some((x) => x.dr || x.src)) how.push('설계도·부품을 아래 제작 트리에 나온 방법(드랍·상점·클랜 도장)으로 구한 뒤 주조소에서 제작');
   if (rec.dr) how.push('아래 획득처에서 직접 드랍');
   if (rec.src) rec.src.forEach((x) => how.push(srcText(x)));
+  if (rec.wa && rec.wa.k.length) how.push(`<b>위키 기준</b>: ${rec.wa.k.map(esc).join(', ')}`);
   if (rec.pl) how.push(`<b>행성</b>: ${rec.pl.map(esc).join(', ')} 미션에서 드랍 (게임 내 설명)`);
   if (rec.c === 'relics') how.push(rec.dr ? '아래 미션 보상으로 획득 후 보이드 균열 미션에서 개봉' : '현재 볼트됨 — 거래 또는 프라임 리서전스(Varzia)로만 획득');
   const ga = rec.ga;
@@ -402,6 +413,11 @@ async function renderDetail(id) {
     how.unshift(`<b>${esc(ga.m)}</b>: ${esc(HOW[ga.m] || '')}`);
   }
   if (how.length) h += `<h2>얻는 방법</h2><div class="how">${how.map((x) => `<div class="how-item">${x}</div>`).join('')}</div>`;
+  if (rec.wa && rec.wa.t) {
+    h += `<details class="wiki-note"><summary>위키 원문 보기 (영어)</summary><p>${esc(rec.wa.t)}</p>
+      <p class="r-sub">출처: <a href="${esc(rec.wa.u)}" target="_blank" rel="noopener">WARFRAME Wiki</a> (CC BY-SA)</p></details>`;
+  }
+  if (rec.wf) h += wikiFarm(rec.wf);
 
   if (ga) h += gatherBlock(ga, rec);
 
@@ -723,9 +739,10 @@ async function renderPlan() {
 
   // 지금 갈 곳: 아직 없는 재료를 같은 장소에서 함께 얻을 수 있게 묶는다
   const spots = new Map();
-  const addSpot = (key, label, item, chance, link) => {
+  const addSpot = (key, label, item, chance, link, wikiPick) => {
     let sp = spots.get(key);
-    if (!sp) spots.set(key, sp = { label, link, items: new Map() });
+    if (!sp) spots.set(key, sp = { label, link, items: new Map(), wiki: 0 });
+    if (wikiPick) sp.wiki += 1;
     const prev = sp.items.get(item);
     if (prev === undefined || (chance ?? 0) > (prev ?? 0)) sp.items.set(item, chance);
   };
@@ -743,13 +760,14 @@ async function renderPlan() {
     const rec = await getRecord(r[0]);
     if (!rec) continue;
     addDrops(rec.n, rec.dr);
+    for (const w of (rec.wf && rec.wf.r || []).slice(0, 4)) addSpot('d' + w[4], w[4], rec.n, null, null, true);
     for (const pl of rec.pl || []) addSpot('p' + pl, `${pl} (행성 미션 어디서나)`, rec.n, null);
   }
   const spotList = [...spots.values()].filter((x) => x.items.size)
-    .sort((a, b) => b.items.size - a.items.size || Math.max(...b.items.values()) - Math.max(...a.items.values())).slice(0, 6);
+    .sort((a, b) => b.items.size - a.items.size || b.wiki - a.wiki || Math.max(...b.items.values()) - Math.max(...a.items.values())).slice(0, 6);
   if (spotList.length) {
-    h += `<div class="card"><h2>지금 갈 곳</h2><p class="muted">아직 다 모으지 못한 재료를 한 번에 많이 얻을 수 있는 장소 순서입니다.</p><div class="farm-list">
-      ${spotList.map((sp) => `<div class="farm-item spot"><div class="farm-head"><b>${sp.link || (sp.label.includes('행성 미션') ? esc(sp.label) : locLink(sp.label))}</b><span class="chip">${sp.items.size}종</span></div>
+    h += `<div class="card"><h2>지금 갈 곳</h2><p class="muted">아직 다 모으지 못한 재료를 한 번에 많이 얻을 수 있는 장소 순서입니다. "위키 추천"은 WARFRAME 위키 사용자들이 추천한 파밍 노드입니다.</p><div class="farm-list">
+      ${spotList.map((sp) => `<div class="farm-item spot"><div class="farm-head"><b>${sp.link || (sp.label.includes('행성 미션') ? esc(sp.label) : locLink(sp.label))}</b><span class="chip">${sp.items.size}종</span>${sp.wiki ? '<span class="chip wiki-chip">위키 추천</span>' : ''}</div>
         ${[...sp.items.entries()].map(([n, c]) => `<div class="farm-src"><span>${nameLink(n)}</span>${c != null ? `<span class="bar"><i style="width:${Math.max(2, Math.min(100, c))}%"></i></span><span class="num">${pct(c)}</span>` : '<span></span><span></span>'}</div>`).join('')}
       </div>`).join('')}</div></div>`;
   }
