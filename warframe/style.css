@@ -344,3 +344,32 @@ tr.have td { opacity: .45; text-decoration: line-through; }
   .tree ul > li::after { width: 8px; }
 }
 .step .qty { margin-left: 6px; }
+
+/* ---------- PC 배치 다듬기 ---------- */
+.tree .node { width: fit-content; min-width: min(280px, 100%); max-width: 100%; }
+.node-drops[open] { min-width: min(520px, 100%); }
+
+.craft-layout { display: flex; flex-direction: column; gap: 16px; }
+.craft-tree { min-width: 0; }
+.craft-side {
+  padding: 14px 16px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.side-title { font-weight: 700; color: var(--accent); margin-bottom: 10px; }
+.side-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+.side-stats div { display: flex; flex-direction: column; }
+.side-stats b { font-size: 17px; font-variant-numeric: tabular-nums; }
+.side-sub { margin: 14px 0 6px; color: var(--muted); font-size: 13px; }
+.side-res { list-style: none; margin: 0; padding: 0; max-height: 320px; overflow: auto; }
+.side-res li { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.side-res .num { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 600; }
+.side-btn { width: 100%; margin: 14px 0 6px; }
+
+@media (min-width: 1180px) {
+  .craft-layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; align-items: start; }
+  .craft-side { order: 2; position: sticky; top: calc(70px + env(safe-area-inset-top, 0px)); }
+  .craft-tree { order: 1; }
+  main { max-width: 1600px; }
+}

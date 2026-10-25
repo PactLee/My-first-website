@@ -321,8 +321,10 @@ async function renderDetail(id) {
   if (ga) h += gatherBlock(ga, rec);
 
   if (rec.b) {
-    h += `<h2>제작 방법</h2>${craftTree(rec)}
-      <p class="muted">아래에서 위로 만들어 올라갑니다. 색이 있는 점은 재료 종류이고, 이름을 누르면 그 재료의 상세 정보로 이동합니다.</p>`;
+    h += `<h2>제작 방법</h2><div class="craft-layout">
+      <aside class="craft-side" id="craft-side"><p class="muted">필요 재료 합계를 계산하는 중…</p></aside>
+      <div class="craft-tree">${craftTree(rec)}
+      <p class="muted">아래에서 위로 만들어 올라갑니다. 색이 있는 점은 재료 종류이고, 이름을 누르면 그 재료의 상세 정보로 이동합니다.</p></div></div>`;
   }
 
   if (rec.rw) {
@@ -344,6 +346,29 @@ async function renderDetail(id) {
     h += `<h2>사용처 (이 재료가 필요한 제작품 ${rec.u.length}개)</h2><p>${rec.u.map((i) => itemLink(i)).join(', ')}</p>`;
   }
   el.innerHTML = h;
+  if (rec.b) renderCraftSide(rec);
+}
+
+// 상세 화면 옆 요약: 이 아이템 1개를 끝까지 만드는 데 드는 총량
+async function renderCraftSide(rec) {
+  const acc = { credits: 0, time: 0, res: new Map(), parts: new Map(), direct: [], steps: [], craftable: new Set(), prefs: craftPrefs() };
+  const node = await expandBuild({ name: rec.n, id: rec.id, kind: 'final' }, rec.b, rec.b.q || 1, acc, 0);
+  const el = document.getElementById('craft-side');
+  if (!el || state.selected !== rec.id) return;
+  const res = [...acc.res.entries()].map(([id, q]) => [state.byId.get(id), q]).filter((x) => x[0])
+    .sort((a, b) => b[1] - a[1]);
+  const parts = [...acc.parts.values()];
+  const stages = new Set(acc.steps.map((x) => x.depth)).size;
+  el.innerHTML = `<div class="side-title">한눈에 보기</div>
+    <div class="side-stats">
+      <div><span class="tile-label">총 크레딧</span><b>${fmt(acc.credits)}</b></div>
+      <div><span class="tile-label">최소 시간</span><b>${duration(node.time)}</b></div>
+      <div><span class="tile-label">제작 단계</span><b>${stages}단계</b></div>
+      <div><span class="tile-label">구할 부품</span><b>${parts.length}개</b></div>
+    </div>
+    ${res.length ? `<div class="side-sub">필요 자원 합계</div><ul class="side-res">${res.map(([r, q]) => `<li><i class="dot k-farm"></i>${itemLink(r[0])}<span class="num">${fmt(q)}</span></li>`).join('')}</ul>` : ''}
+    <button class="btn primary side-btn" data-plan-add="${rec.id}">제작 계획에 추가</button>
+    <p class="r-sub">부품·정제 자원까지 모두 펼친 합계입니다.</p>`;
 }
 
 // 상세 영역의 위임 이벤트: 필터 / 더 보기 / 계획 추가
