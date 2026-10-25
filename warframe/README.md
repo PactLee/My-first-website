@@ -40,13 +40,15 @@ tar xzf wfcd-items-*.tgz
 # 부품(섀시 등) 제작 레시피용 공식 Public Export 데이터
 mkdir pep && (cd pep && npm pack warframe-public-export-plus && tar xzf *.tgz)
 python3 warframe/tools/build_data.py package/data/json pep/package
+# (선택) 이미지 서버를 못 쓰는 환경용 대체 이미지 묶음 (2018년 패키지 이미지)
+mkdir old && (cd old && npm pack warframe-items@1.26.0 && tar xzf *.tgz)
+python3 warframe/tools/build_images.py old/package/data package/data/json
 ```
 
 ## 알려진 한계
 
 - 노드 이름은 게임에서도 영어를 쓰므로 영어로 표기합니다. 공식 번역이 없는 일부 적·장소 이름도 영어로 남습니다.
-- 이미지는 이 저장소의 실행 환경(Artifact 미리보기 등)에서 외부 이미지가 막혀 있으면 표시되지 않습니다.
+- 이미지는 cdn.warframestat.us에서 불러오고, 막혀 있으면 data/img.json의 대체 이미지(2018년 이전 아이템 약 2,800개)를 씁니다. 그 이후 아이템은 이미지 서버에 접속할 수 있을 때만 보입니다.
 - 낚시 핫스팟 지도 등 위키에만 있는 세부 정보는 포함되어 있지 않습니다(위키 링크로 안내).
-- 이미지는 cdn.warframestat.us에서 불러옵니다.
 
 Warframe은 Digital Extremes의 상표이며, 이 도우미는 비공식 팬 제작물입니다.

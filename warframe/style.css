@@ -373,3 +373,10 @@ tr.have td { opacity: .45; text-decoration: line-through; }
   .craft-tree { order: 1; }
   main { max-width: 1600px; }
 }
+
+/* ---------- 아이콘 ---------- */
+.node-img { width: 32px; height: 32px; object-fit: contain; flex: none; }
+.node .node-img { margin-top: -2px; }
+.res-img { width: 36px; height: 36px; object-fit: contain; flex: none; }
+.side-img { width: 22px; height: 22px; object-fit: contain; flex: none; }
+span.node-img, span.res-img, span.side-img { display: none; }

@@ -22,6 +22,13 @@ const state = {
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fmt = (n) => Number(n).toLocaleString('ko-KR');
+const HANGUL = /^[가-힣ㄱ-ㅎ]/;
+// 가나다(ㄱ~ㅎ) 순. 한글 이름을 먼저, 공식 번역이 없는 영어 이름은 그 뒤에 A~Z 순으로
+function nameCompare(a, b) {
+  const ka = HANGUL.test(a), kb = HANGUL.test(b);
+  if (ka !== kb) return ka ? -1 : 1;
+  return a.localeCompare(b, 'ko');
+}
 const norm = (s) => String(s || '').toLowerCase().replace(/[\s\-'’.]/g, '');
 
 function store(key, fallback) {
@@ -42,8 +49,22 @@ function pct(c) {
 }
 function img(name, cls = '') {
   if (!name) return `<span class="thumb ${cls}"></span>`;
-  return `<img class="${cls}" loading="lazy" src="${esc(state.index.img + encodeURIComponent(name))}" alt="" onerror="this.style.visibility='hidden'">`;
+  return `<img class="${cls}" loading="lazy" src="${esc(state.index.img + encodeURIComponent(name))}" data-img="${esc(name)}" alt="" onerror="imgFail(this)">`;
 }
+
+// 이미지 서버에 접속할 수 없으면(예: 미리보기 환경) data/img.json 의 대체 이미지를 쓴다
+let imgPack = null;
+function imgFail(el) {
+  if (el.dataset.fb) { el.style.visibility = 'hidden'; return; }
+  el.dataset.fb = '1';
+  if (!imgPack) imgPack = fetch(DATA + 'img.json').then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
+  imgPack.then((pack) => {
+    const src = pack[el.dataset.img];
+    if (src) el.src = src; else el.style.visibility = 'hidden';
+  });
+}
+window.imgFail = imgFail;
+
 function fandom(en) {
   return 'https://warframe.fandom.com/wiki/' + encodeURIComponent(String(en).replace(/ /g, '_'));
 }
@@ -105,11 +126,10 @@ function search() {
       else if (n.includes(q) || e.includes(q)) score = 30;
       else if (row[7].some((a) => norm(a).includes(q))) score = 15;
       else continue;
-      if (row[3] === 'enemies') score -= 5;
     }
     out.push([score, row]);
   }
-  out.sort((a, b) => b[0] - a[0] || a[1][1].length - b[1][1].length || a[1][1].localeCompare(b[1][1], 'ko'));
+  out.sort((a, b) => (b[0] === 100) - (a[0] === 100) || nameCompare(a[1][1], b[1][1]));
   return out.map((x) => x[1]);
 }
 
@@ -228,6 +248,7 @@ function bestDrop(dr) {
 function treeNode(row) {
   const kind = rowKind(row);
   const name = row.id != null ? itemLink(row.id) : `<b>${esc(row.n)}</b>`;
+  const icon = img(row.id != null ? state.byId.get(row.id)?.[5] : row.img, 'node-img');
   const meta = [];
   if (row.b) meta.push(`${fmt(row.b.cr)} 크레딧`, duration(row.b.tm), row.b.q > 1 ? `${row.b.q}개 생산` : '');
   if (kind === 'drop') meta.push(`추천: ${bestDrop(row.dr || [row.d1])}`);
@@ -243,13 +264,13 @@ function treeNode(row) {
     else if (!row.b.l.some((x) => x.id == null && /Blueprint$/.test(x.e || ''))) extra += '<div class="r-sub">이 부품의 설계도 획득처는 위키를 참고하세요.</div>';
   }
   const children = row.b ? `<ul>${row.b.l.map(treeNode).join('')}</ul>` : '';
-  return `<li><div class="node k-${kind}"><i class="dot k-${kind}"></i><div class="node-main">
+  return `<li><div class="node k-${kind}"><i class="dot k-${kind}"></i>${icon}<div class="node-main">
       <div class="node-title">${name}<span class="qty">× ${fmt(row.q)}</span></div>
       <div class="node-meta">${chips(meta)}</div>${extra}</div></div>${children}</li>`;
 }
 
 function craftTree(rec) {
-  const root = `<div class="node k-final"><i class="dot k-final"></i><div class="node-main"><div class="node-title"><b>${esc(rec.n)}</b>${rec.b.q > 1 ? `<span class="qty">× ${rec.b.q}</span>` : ''}</div>
+  const root = `<div class="node k-final"><i class="dot k-final"></i>${img(rec.img, 'node-img')}<div class="node-main"><div class="node-title"><b>${esc(rec.n)}</b>${rec.b.q > 1 ? `<span class="qty">× ${rec.b.q}</span>` : ''}</div>
     <div class="node-meta">${chips([`${fmt(rec.b.cr)} 크레딧`, duration(rec.b.tm), rec.b.k ? '설계도 재사용' : ''])}</div></div></div>`;
   return `${legend()}<ul class="tree"><li>${root}<ul>${rec.b.l.map(treeNode).join('')}</ul></li></ul>`;
 }
@@ -366,7 +387,7 @@ async function renderCraftSide(rec) {
       <div><span class="tile-label">제작 단계</span><b>${stages}단계</b></div>
       <div><span class="tile-label">구할 부품</span><b>${parts.length}개</b></div>
     </div>
-    ${res.length ? `<div class="side-sub">필요 자원 합계</div><ul class="side-res">${res.map(([r, q]) => `<li><i class="dot k-farm"></i>${itemLink(r[0])}<span class="num">${fmt(q)}</span></li>`).join('')}</ul>` : ''}
+    ${res.length ? `<div class="side-sub">필요 자원 합계</div><ul class="side-res">${res.map(([r, q]) => `<li>${img(r[5], 'side-img')}${itemLink(r[0])}<span class="num">${fmt(q)}</span></li>`).join('')}</ul>` : ''}
     <button class="btn primary side-btn" data-plan-add="${rec.id}">제작 계획에 추가</button>
     <p class="r-sub">부품·정제 자원까지 모두 펼친 합계입니다.</p>`;
 }
@@ -469,9 +490,10 @@ function planNode(n, have) {
   if (n.kind === 'refine' || (n.kind === 'farm' && n.id != null && state.craftable.has(n.id))) {
     meta.push(`<button class="link-btn" data-craft-toggle="${n.id}" data-to="${n.kind === 'refine' ? 0 : 1}">${n.kind === 'refine' ? '파밍으로 계산' : '직접 제작으로 계산'}</button>`);
   }
+  const icon = img(n.id != null ? state.byId.get(n.id)?.[5] : n.part && n.part.img, 'node-img');
   const box = n.key && !n.b ? `<input type="checkbox" class="have-box" data-have="${esc(n.key)}" ${done ? 'checked' : ''} aria-label="보유">` : '';
   const kids = n.children && n.children.length ? `<ul>${n.children.map((c) => planNode(c, have)).join('')}</ul>` : '';
-  return `<li><div class="node k-${n.kind}${done ? ' done' : ''}" data-have-row>${box}<i class="dot k-${n.kind}"></i><div class="node-main">
+  return `<li><div class="node k-${n.kind}${done ? ' done' : ''}" data-have-row>${box}<i class="dot k-${n.kind}"></i>${icon}<div class="node-main">
     <div class="node-title">${name}<span class="qty">× ${fmt(n.q)}</span></div><div class="node-meta">${chips(meta)}</div></div></div>${kids}</li>`;
 }
 
@@ -502,7 +524,7 @@ async function renderPlan() {
   state.craftable = acc.craftable;
   const have = store('wf-have', {});
   const resRows = [...acc.res.entries()].map(([id, q]) => [state.byId.get(id), q]).filter((x) => x[0])
-    .sort((a, b) => a[0][1].localeCompare(b[0][1], 'ko'));
+    .sort((a, b) => nameCompare(a[0][1], b[0][1]));
   const farmParts = [...acc.parts.values()];
   const resDone = resRows.filter(([r]) => have['r' + r[0]]).length;
   const partDone = farmParts.filter((x) => have['p' + x.e]).length;
@@ -578,7 +600,7 @@ async function renderPlan() {
       const done = have['r' + r[0]];
       const canCraft = acc.craftable.has(r[0]);
       return `<div class="res-tile${done ? ' done' : ''}" data-have-row><input type="checkbox" class="have-box" data-have="r${r[0]}" ${done ? 'checked' : ''} aria-label="보유">
-        <div><div class="res-qty">${fmt(q)}</div>${itemLink(r[0])}${canCraft ? `<div><button class="link-btn" data-craft-toggle="${r[0]}" data-to="1">직접 제작으로 계산</button></div>` : ''}</div></div>`;
+        ${img(r[5], 'res-img')}<div><div class="res-qty">${fmt(q)}</div>${itemLink(r[0])}${canCraft ? `<div><button class="link-btn" data-craft-toggle="${r[0]}" data-to="1">직접 제작으로 계산</button></div>` : ''}</div></div>`;
     }).join('')}</div><p class="muted">체크하면 보유한 것으로 표시됩니다. 자원 이름을 누르면 파밍 위치를 볼 수 있습니다.</p></div>`;
   }
 
@@ -589,7 +611,7 @@ async function renderPlan() {
       const best = x.dr ? x.dr.slice(0, 3).map((d) => `<div class="farm-src"><span>${esc(d[0])}${d[4] && d[4].vt ? ' <span class="tag vault">볼트됨</span>' : ''}</span><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span><span class="num">${pct(d[1])}</span></div>`).join('')
         : `<div class="r-sub">${x.src ? x.src.slice(0, 2).map(srcText).join('<br>') : x.how ? esc(x.how) : '드랍 정보 없음 (시장·퀘스트·상인)'}</div>`;
       return `<div class="farm-item k-${x.kind}${done ? ' done' : ''}" data-have-row><div class="farm-head"><input type="checkbox" class="have-box" data-have="p${esc(x.e)}" ${done ? 'checked' : ''} aria-label="보유">
-        <i class="dot k-${x.kind}"></i><b>${esc(x.n)}${x.b ? ' 설계도' : ''}</b><span class="qty">× ${fmt(x.q)}</span></div>${best}</div>`;
+        <i class="dot k-${x.kind}"></i>${img(x.img, 'side-img')}<b>${esc(x.n)}${x.b ? ' 설계도' : ''}</b><span class="qty">× ${fmt(x.q)}</span></div>${best}</div>`;
     }).join('')}</div></div>`;
   }
 

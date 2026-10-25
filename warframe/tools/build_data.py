@@ -819,7 +819,8 @@ for rec in records:
 # 사용처
 for cu, ids in used_in.items():
     rid = index_of[cu]
-    records[rid]["u"] = sorted(ids, key=lambda i: records[i]["n"])
+    # 가나다순 (한글 이름 먼저, 영어 이름은 뒤에)
+    records[rid]["u"] = sorted(ids, key=lambda i: (not re.match(r"[가-힣]", records[i]["n"]), records[i]["n"]))
 
 # 성유물 레코드
 for base in sorted(relics):
