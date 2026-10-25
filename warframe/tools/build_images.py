@@ -20,6 +20,7 @@ import json
 import os
 import re
 import sys
+from collections import defaultdict
 
 from PIL import Image
 
@@ -68,33 +69,34 @@ for f in files:
 
 
 def find(it):
-    u, img, name = it.get("uniqueName"), it.get("imageName"), it.get("name") or ""
-    if u in by_unique:
-        return by_unique[u]
+    """같은 아이템(uniqueName)으로 확인된 이미지만 쓴다. 이름이 비슷한 파일로 추측하지 않는다."""
+    u, img = it.get("uniqueName"), it.get("imageName")
+    # 성유물은 시대(리스·메소·네오·액시·레퀴엠)별로 같은 아이콘을 쓴다
     m = re.match(r"^Relic(Lith|Meso|Neo|Axi|Requiem)", img or "")
-    if m and m.group(1).lower() in relic_era:
-        return relic_era[m.group(1).lower()]
-    if img and norm(img) in by_norm:
-        return by_norm[norm(img)]
-    if name and slug(name) in by_stem:
-        return by_stem[slug(name)]
+    if m:
+        return relic_era.get(m.group(1).lower())
+    src = by_unique.get(u)
+    if src and not src.startswith("[ph]"):
+        return src
     return None
 
 
-wanted = {}  # 현재 imageName → 2018 파일
+# 키는 현재 imageName 이다. 같은 imageName 을 여러 아이템이 쓰는데 2018년 이미지가 서로 다르면
+# 어느 쪽이 맞는지 알 수 없으므로 빼 버린다. 자리표시용(PH) 이미지도 제외.
+candidates = defaultdict(set)
 for path in glob.glob(os.path.join(CUR, "*.json")):
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
     if not isinstance(data, list):
         continue
     for it in data:
-        if not isinstance(it, dict) or not it.get("imageName"):
-            continue
-        if it["imageName"] in wanted:
+        if not isinstance(it, dict) or not it.get("imageName") or it["imageName"].upper().startswith("PH"):
             continue
         src = find(it)
         if src:
-            wanted[it["imageName"]] = src
+            candidates[it["imageName"]].add(src)
+wanted = {k: next(iter(v)) for k, v in candidates.items() if len(v) == 1}
+print(f"후보 {len(candidates)}개 중 모호한 {len(candidates) - len(wanted)}개 제외")
 
 out = {}
 cache = {}
@@ -106,7 +108,7 @@ for key, src in sorted(wanted.items()):
             continue
         im.thumbnail((SIZE, SIZE))
         buf = io.BytesIO()
-        im.save(buf, "WEBP", quality=70, method=6)
+        im.save(buf, "WEBP", quality=70, method=4)
         cache[src] = "data:image/webp;base64," + base64.b64encode(buf.getvalue()).decode()
     out[key] = cache[src]
 
