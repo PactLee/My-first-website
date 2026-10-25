@@ -422,11 +422,16 @@ document.addEventListener('click', (e) => {
     updatePlanBadge();
     renderPlan();
   } else if (e.target.closest('[data-plan-clear]')) {
-    if (confirm('제작 계획을 모두 비울까요?')) {
+    // 확인 대화상자를 쓸 수 없는 환경도 있어 버튼을 두 번 누르게 한다
+    const btn = e.target.closest('[data-plan-clear]');
+    if (btn.dataset.armed) {
       save('wf-plan', []);
       save('wf-have', {});
       updatePlanBadge();
       renderPlan();
+    } else {
+      btn.dataset.armed = '1';
+      btn.textContent = '한 번 더 누르면 모두 지워집니다';
     }
   }
 });
