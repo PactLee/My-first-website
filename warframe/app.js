@@ -760,8 +760,10 @@ async function renderPlan() {
     const rec = await getRecord(r[0]);
     if (!rec) continue;
     addDrops(rec.n, rec.dr);
-    for (const w of (rec.wf && rec.wf.r || []).slice(0, 4)) addSpot('d' + w[4], w[4], rec.n, null, null, true);
-    for (const pl of rec.pl || []) addSpot('p' + pl, `${pl} (행성 미션 어디서나)`, rec.n, null);
+    const wikiRows = (rec.wf && rec.wf.r || []).slice(0, 4);
+    for (const w of wikiRows) addSpot('d' + w[4], w[4], rec.n, null, null, true);
+    // 위키 추천 노드가 있는 자원은 "행성 어디서나"보다 구체적인 노드를 우선한다
+    if (!wikiRows.length) for (const pl of rec.pl || []) addSpot('p' + pl, `${pl} (행성 미션 어디서나)`, rec.n, null);
   }
   const spotList = [...spots.values()].filter((x) => x.items.size)
     .sort((a, b) => b.items.size - a.items.size || b.wiki - a.wiki || Math.max(...b.items.values()) - Math.max(...a.items.values())).slice(0, 6);

@@ -916,5 +916,725 @@
 },
 "Morgha Stock": {
 "title": "Morgha Stock"
+},
+"Morphics": {
+"title": "Morphics",
+"acq": "By purchasing this item you can directly exchange 10 Platinum 10 for 1 Morphics.—In-Game Description\nBeginning in Update 9.0 (2013-07-13) materials could be purchased directly from the market for Platinum.",
+"farm": "Your thirst for knowledge is as insatiable as mine.\nThese farming locations and tips are based on opinions and may not be 100% true. These should be viewed as advice and not critical facts, and results may vary from player to player.\nTarget | Planet | Name | Type | Level | Tile Set\nMars | Hellas | Exterminate | 8 - 10 | Grineer Settlement\nMars | Gradivus | Sabotage | 9 - 11 | Corpus Ship\nMars | Augustus | Excavation | 9 - 14 | Grineer Settlement\nMars | Olympus | Disruption | 15 - 20 | Grineer Settlement\nMars | Tyana Pass | Mirror Defense | 25 - 30 | Grineer Settlement\nMars | War | Assassination | 11 - 13 | Grineer Settlement\nPhobos | Iliad | Assassination | 13 - 15 | Corpus Ship\nMars | Wahiba | Survival ( Dark Sector ) | 10 - 20 | Corpus Ship\nMercury | Lares | Defense | 6 - 11 | Grineer Asteroid\nMars | Kadesh | Defense ( Dark Sector ) | 10 - 20 | Grineer Settlement"
+},
+"Mother Token": {
+"title": "Mother Token"
+},
+"Mpvdualpackfusionbundle": {
+"title": "Mpvdualpackfusionbundle"
+},
+"Mpvsinglepackfusionbundle": {
+"title": "Mpvsinglepackfusionbundle"
+},
+"Murkray Bait": {
+"title": "Fishing"
+},
+"Mutagen Mass": {
+"title": "Mutagen Mass"
+},
+"Mutagen Sample": {
+"title": "Mutagen Sample",
+"farm": "Your thirst for knowledge is as insatiable as mine.\nThese farming locations and tips are based on opinions and may not be 100% true. These should be viewed as advice and not critical facts, and results may vary from player to player.\nTarget | Planet | Name | Type | Level | Tile Set\nDeimos | Hyf | Defense | 15 - 20 | Orokin Derelict\nDeimos | Terrorem | Survival | 25 - 35 | Orokin Derelict\nDeimos | Cambion Drift | Open World | 20 - 35 | Cambion Drift\nEris | Xini | Interception | 30 - 40 | Corpus Ship"
+},
+"Mutalist Alad V Assassinate": {
+"title": "Mutalist Alad V Assassinate"
+},
+"Mutalist Alad V Nav Coordinate": {
+"title": "Mutalist Alad V Nav Coordinate",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nDeimos | Hyf | Defense | 15 - 20 | Orokin Derelict"
+},
+"Mytocardia Spore": {
+"title": "Mytocardia Spore"
+},
+"Namalon": {
+"title": "Namalon"
+},
+"Nano Spores": {
+"title": "Nano Spores",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nEris | Akkad | Defense ( Dark Sector ) | 35 - 45 | Infested Ship\nSaturn | Piscinas | Survival ( Dark Sector ) | 26 - 36 | Grineer Asteroid\nDeimos | Hyf | Defense | 15 - 20 | Orokin Derelict\nDeimos | Terrorem | Survival | 25 - 35 | Orokin Derelict"
+},
+"Nav Coordinate": {
+"title": "Nav Coordinate"
+},
+"Necracoil": {
+"title": "Necracoil",
+"farm": "Your thirst for knowledge is as insatiable as mine.\nThese farming locations and tips are based on opinions and may not be 100% true. These should be viewed as advice and not critical facts, and results may vary from player to player.\nTarget | Planet | Name | Type | Level | Tile Set\nDeimos | Persto | Survival | 55 - 60 | Albrecht's Laboratories\nDeimos | Cambire | Alchemy | 55 - 60 | Albrecht's Laboratories"
+},
+"Necrathene": {
+"title": "Necrathene"
+},
+"Neural Sensors": {
+"title": "Neural Sensors",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nJupiter | Elara | Survival | 15 - 20 | Corpus Gas City\nJupiter | Sinai | Defense ( Dark Sector ) | 20 - 30 | Corpus Gas City\nJupiter | Themisto | Assassination | 18 - 20 | Corpus Gas City\nJupiter | Cameria | Survival ( Dark Sector ) | 20 - 30 | Corpus Gas City"
+},
+"Nightfall Apothic": {
+"title": "Apothic"
+},
+"Nightmare Tatters": {
+"title": "Nightmare Tatters"
+},
+"Nightwatchfusionbundle": {
+"title": "Nightwatchfusionbundle"
+},
+"Nightwave": {
+"title": "Nightwave"
+},
+"Nistlepod": {
+"title": "Nistlepod"
+},
+"Noctrul": {
+"title": "Noctrul"
+},
+"Nodulite": {
+"title": "Nodulite",
+"acq": "The blueprint can be acquired by completing the K-Drive Race \"Exocrine Flow\" on the Cambion Drift. Note: Active races rotate on a daily basis and thus it is not available every day.\nBlueprints can be reacquired by repeating the relevant race after the blueprint is sold or consumed. Possessing a completed component, or a K-Drive containing the component, does not prevent acquiring its blueprint again."
+},
+"Norg Bait": {
+"title": "Fishing"
+},
+"Nosam Cutter": {
+"title": "Mining"
+},
+"Nullstones": {
+"title": "Nullstones"
+},
+"Nunchasa": {
+"title": "Nunchasa",
+"acq": "Nunchasa's blueprints can be purchased from Cephalon Melica on Yuvan Peak, Earth, or the Chrysalith, Zariman Ten Zero, for Entropic Kuva, which are dropped by Entropic Eximus in the Zariman.\nThe main blueprint costs 200, while the limb, grip, and string blueprints cost 50 each, requiring 400 total.\nManufacturing Requirements 📝 Edit blueprint requirements\n20,000 | 1 | 1 | 1 | 1 | Time: 1 Day(s)\nRush: 35\nMarket Price: 230 | Blueprints Price:N/A\nUpper Limb\n15,000 | Alloy Plate 1,700 | Voidgel Orb 30 | Voidplume Pinion 2 | Plastids 800 | Time: 12 Hour(s)\nRush: 25\nLower Limb\n15,000 | Alloy Plate 1,700 | Voidgel Orb 30 | Voidplume Pinion 2 | Plastids 800 | Time: 12 Hour(s)\nRush: 25\nString\n15,000 | Polymer Bundle 750 | Gallium 4 | Oxium 100 | Neurodes 2 | Time: 12 Hour(s)\nRush: 25\nGrip\n15,000 | Cryotic 400 | Salvage 2,500 | Entrati Lanthorn 2 | Morphics 5 | Time: 12 Hour(s)\nRush: 25"
+},
+"Nyth": {
+"title": "Nyth"
+},
+"Omega Isotope": {
+"title": "Omega Isotope"
+},
+"On-Lyne Cd": {
+"title": "On-Lyne Cd"
+},
+"Orokin Animus Matrix": {
+"title": "Orokin Animus Matrix"
+},
+"Orokin Ballistics Matrix": {
+"title": "Orokin Ballistics Matrix"
+},
+"Orokin Cell": {
+"title": "Orokin Cell",
+"farm": "Your thirst for knowledge is as insatiable as mine.\nThese farming locations and tips are based on opinions and may not be 100% true. These should be viewed as advice and not critical facts, and results may vary from player to player.\nTarget | Planet | Name | Type | Level | Tile Set\nSaturn | Titan | Survival | 21 - 26 | Grineer Galleon\nDeimos | Magnacidium | Assassination | 20 - 25 | Orokin Derelict\nCeres | Lex | Capture | 14 - 16 | Grineer Shipyard\nCeres | Exta | Assassination | 14 - 16 | Grineer Shipyard\nCeres | Gabii | Survival ( Dark Sector ) | 15 - 25 | Grineer Galleon\nSaturn | Piscinas | Survival ( Dark Sector ) | 26 - 36 | Grineer Asteroid"
+},
+"Orokin Monitor": {
+"title": "Orokin Monitor"
+},
+"Orokin Orientation Matrix": {
+"title": "Orokin Orientation Matrix"
+},
+"Otak Token": {
+"title": "Otak Token"
+},
+"Oxium": {
+"title": "Oxium",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nPhobos | Gulliver | Defense | 10 - 15 | Corpus Ship\nJupiter | Io | Defense | 15 - 20 | Corpus Gas City\nPluto | Outer Terminus | Defense | 30 - 40 | Corpus Outpost\nLua | Tycho | Survival | 25 - 30 | Orokin Moon\nLua | Apollo | Disruption | 35 - 40 | Orokin Moon\nEuropa | Paimon | Defense | 18 - 23 | Corpus Ice Planet\nJupiter | Elara | Survival | 15 - 20 | Corpus Gas City\n• Io, Jupiter yields around 80 Oxium in 10 waves."
+},
+"Pangolin Sword": {
+"title": "Pangolin Sword",
+"acq": "The Pangolin Sword's blueprint can be bought from Nightwave Offerings for 50x Cred\nManufacturing Requirements 📝 Edit blueprint requirements\n20,000 | Control Module 1 | Ferrite 750 | Circuits 300 | Alloy Plate 80 | Time: 12 Hour(s)\nRush: 25\nMarket Price: N/A | Blueprints Price:N/A"
+},
+"Paracesis": {
+"title": "Paracesis",
+"acq": "The weapon blueprint is given to the player upon completing the Chimera Prologue quest.\nManufacturing Requirements 📝 Edit blueprint requirements\n30,000 | Orokin Ducats 1,000 | Galatine 1 | Eidolon Shard 5 | Orokin Cell 15 | Time: 12 Hour(s)\nRush: 30\nMarket Price: N/A | Blueprints Price:N/A"
+},
+"Passionate Void Offering": {
+"title": "Passionate Void Offering",
+"acq": "The Passionate Void Offering could be purchased for 100,000 Credits 100,000 from the Market, found under Equipment, subsection Gear. However, it was discontinued after the event officially ended.\n• Void Offerings were mistakenly released prior to the event as reusable blueprints, rather than individual charges. Though these are noticeably more costly, players who purchased these blueprints can continue to craft charges despite the event's conclusion."
+},
+"Pathos Clamp": {
+"title": "Pathos Clamp"
+},
+"Patient Zero": {
+"title": "Patient Zero"
+},
+"Pax Bolt": {
+"title": "Pax Bolt",
+"acq": "Can be bought from Rude Zuud for 10,000 Standing 10,000 per arcane upon reaching the rank of Old Mate."
+},
+"Pax Charge": {
+"title": "Pax Charge",
+"acq": "Can be bought from Rude Zuud for 10,000 Standing 10,000 per arcane upon reaching the rank of Old Mate."
+},
+"Pax Soar": {
+"title": "Pax Soar",
+"acq": "Can be bought from Rude Zuud for 10,000 Standing 10,000 per arcane upon reaching the rank of Old Mate."
+},
+"Peppered Bait": {
+"title": "Fishing"
+},
+"Peram Fishing Spear": {
+"title": "Peram Fishing Spear"
+},
+"Personal Quarters Segment": {
+"title": "Orbiter Segments"
+},
+"Pharoma": {
+"title": "Pharoma",
+"acq": "The Pharoma can be bought from Fisher Hai-Luk at Cetus in the Plains of Eidolon at the cost of 100 Standing 100, provided the player has an Ostron reputation rank of Trusted."
+},
+"Phasmin": {
+"title": "Phasmin"
+},
+"Plantitem": {
+"title": "Plantitem"
+},
+"Plasma Sword": {
+"title": "Plasma Sword",
+"acq": "The Plasma Sword's blueprint can be bought from Nightwave Offerings for 50x Cred\nManufacturing Requirements 📝 Edit blueprint requirements\n20,000 | Orokin Cell 1 | Ferrite 500 | Salvage 450 | Polymer Bundle 50 | Time: 12 Hour(s)\nRush: 25\nMarket Price: N/A | Blueprints Price:N/A"
+},
+"Plastids": {
+"title": "Plastids",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nUranus | Assur | Survival ( Dark Sector ) | 25 - 35 | Grineer Galleon\nUranus | Stephano | Defense | 24 - 29 | Grineer Sealab\nSaturn | Piscinas | Survival ( Dark Sector ) | 26 - 36 | Grineer Asteroid\nEris | Akkad | Defense ( Dark Sector ) | 35 - 45 | Infested Ship\nUranus | Ophelia | Survival | 24 - 29 | Grineer Sealab\nSaturn | Helene | Defense | 21 - 26 | Grineer Galleon\nPluto | Outer Terminus | Defense | 30 - 40 | Corpus Outpost\nPluto | Palus | Survival | 30 - 40 | Corpus Ship\nPhobos | Gulliver | Defense | 10 - 15 | Corpus Ship\nPhobos | Zeugma | Survival ( Dark Sector ) | 15 - 25 | Grineer Asteroid\nPhobos | Stickney | Survival | 10 - 15 | Corpus Ship\nDeimos | Cambion Drift | Open World | 20 - 35 | Cambion Drift\nUranus | Brutus | Ascension | 45 - 50 | Stalker's Lair"
+},
+"Polymer Bundle": {
+"title": "Polymer Bundle",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nUranus | Assur | Survival ( Dark Sector ) | 25 - 35 | Grineer Galleon\nUranus | Ophelia | Survival | 24 - 29 | Grineer Sealab"
+},
+"Potent Pherliac Pods": {
+"title": "The Jordas Precept"
+},
+"Processed Fass Residue": {
+"title": "Processed Fass Residue",
+"acq": "Purchased from Daughter for 300 Standing 300 at Entrati Rank 3."
+},
+"Processed Vome Residue": {
+"title": "Processed Vome Residue",
+"acq": "Purchased from Daughter for 400 Standing 400 at Entrati Rank 4."
+},
+"Purgator 1": {
+"title": "Purgator 1",
+"acq": "Purgator 1's blueprints can be purchased from Minerva of The Hex for Standing Standing Standing; component blueprints for 5,000 Standing 5,000 and the main blueprint for 15,000 Standing 15,000 to a total of 30,000 Standing 30,000, all requiring Rank 5 - Pizza Party.\nThis weapon is also part of the Scaldra Dominance Pack for 655 Platinum 655.\nManufacturing Requirements 📝 Edit blueprint requirements\n20,000 | 1 | 1 | 1 | | Time: 12 Hour(s)\nRush: 25\nMarket Price: 225 | Blueprints Price:N/A\nBarrel\n20,000 | Höllvanian Pitchweave Fragment 150 | Alloy Plate 300 | Polymer Bundle 180 | Gallium 6 | Time: 12 Hour(s)\nRush: 25\nReceiver\n20,000 | Experimental Arc-Relay 10 | Salvage 750 | Circuits 450 | Rubedo 260 | Time: 12 Hour(s)\nRush: 25\nStock\n20,000 | Efervon Sample 50 | Ferrite 350 | Plastids 200 | Morphics 4 | Time: 12 Hour(s)\nRush: 25"
+},
+"Purgatoryblacktokenfusionbundle": {
+"title": "Purgatoryblacktokenfusionbundle"
+},
+"Purgatorybluetokenfusionbundle": {
+"title": "Purgatorybluetokenfusionbundle"
+},
+"Purgatorygoldtokenfusionbundle": {
+"title": "Purgatorygoldtokenfusionbundle"
+},
+"Pustrels": {
+"title": "Pustrels"
+},
+"Pustulite": {
+"title": "Pustulite"
+},
+"Pyrol": {
+"title": "Pyrol"
+},
+"Pyrus Essence": {
+"title": "Pyrus Essence"
+},
+"Radian Sentirum": {
+"title": "Radian Sentirum"
+},
+"Raiju Core": {
+"title": "Raiju Core"
+},
+"Railjackendotieralarge": {
+"title": "Railjackendotieralarge"
+},
+"Railjackendotierasmall": {
+"title": "Railjackendotierasmall"
+},
+"Railjackendotierblarge": {
+"title": "Railjackendotierblarge"
+},
+"Railjackendotierbsmall": {
+"title": "Railjackendotierbsmall"
+},
+"Railjackendotierclarge": {
+"title": "Railjackendotierclarge"
+},
+"Railjackendotiercsmall": {
+"title": "Railjackendotiercsmall"
+},
+"Railjackendotierdlarge": {
+"title": "Railjackendotierdlarge"
+},
+"Railjackendotierdsmall": {
+"title": "Railjackendotierdsmall"
+},
+"Rarefusionbundle": {
+"title": "Rarefusionbundle"
+},
+"Rauta": {
+"title": "Rauta",
+"acq": "Limited Time Event\nIn the first two weeks after The Seven Crimes of Kullervo launched (June 21st, 2023 @ 12 PM ET until July 5th, 2023 @ 12 PM ET), entering Duviri via the Star Chart banner and Dormizone door would present all players with an event mission called Kullervo's Hold, which was based on The Lone Story's spiral-focused gameplay and always included the dungeon island in the Duviri Landscape regardless of the current Mood Spiral. This limited-time access required 5 Pathos Clamps.\nNormal Progression\nKullervo's Hold only appears in Duviri during Anger, Sorrow, and Fear Spirals from The Duviri Experience and The Lone Story game modes. It can appear as a fourth, fifth, or sixth spiral stage or a side objective; speak with The Warden to engage in gladiatorial combat with the imprisoned Kullervo in the waterlogged arena.\nCompletion of the Spiral (defeating the Orowyrm) and defeating Kullervo awards 4, 5, or 6 Kullervo's Bane (6, 7, or 8 on The Steel Path), which can be traded to Acrithis for Rauta's main blueprint and components: the main blueprint requires 12 Banes, while the Barrel, Receiver, and Stock components each require 6 Banes, for a total of 30 Kullervo's Banes."
+},
+"Razorback Cipher": {
+"title": "Razorback Cipher",
+"acq": "The respective blueprint is sent to the player with a message from the Lotus regarding the event and where to find its key component, the Cryptographic ALU."
+},
+"Relay Strut Component": {
+"title": "Relay Strut Component",
+"acq": "Relay Strut Component can be crafted from Trembera Essence.\nThe Blueprint for the Relay Strut Component is attached in a message from Cressa Tal to the player in their inbox and is reusable.\nPlayers are required to craft 5 Relay Strut Component, which will need a total of 75 Trembera Essence, for the event.\nResources / Components Edit\nCommon Drops | Agnovidisc • Alloy Plate • Efervon Sample • Entrati Obols • Ferrite • Höllvanian Pitchweave Fragment • Nano Spores • Salvage\nUncommon Drops | Carbides • Circuits • Cryotic • Cubic Diodes • Experimental Arc-Relay • Hexenon • Javlok Capacitor • Laudavi • Necracoil • Oxium • Plastids • Polymer Bundle • Rubedo • Stela • Techrot Chitin • Thrax Plasm • Voidgel Orb\nRare Drops | Argon Crystal • Control Module • Entrati Lanthorn • Gallium • Morphics • Neural Sensors • Neurodes • Orokin Cell • Servoris • Techrot Motherboard • Tellurium\nResearch Materials | Antiserum Injector Fragment • Detonite Ampule ( Detonite Injector ) • Fieldron Sample ( Fieldron ) • Mutagen Sample ( Mutagen Mass ) • Pigment • Synthula\nMission Drops | Ascaris Prime • Ignia • Lyroic Bridge • Orokin Cipher • Pix Chip • Ren Hypercore • Somatic Fibers • Spectral Debris • Stock • Synthetic Eidolon Shard\nEmpyrean\nCommon Drops | Carbides • Cubic Diodes • Titanium • Ticor Plate\nUncommon Drops | Asterite • Gallos Rods • Isos\nRare Drops | Aucrux Capacitors • Komms • Nullstones • Tellurium\nMission Drops | Anomaly Shard • Corrupted Holokey\n•\nSpecial\nWarframe Currency | Atramentum "
+},
+"Ren Hypercore": {
+"title": "Ren Hypercore"
+},
+"Repeller Systems": {
+"title": "Repeller Systems"
+},
+"Riven Sliver": {
+"title": "Riven Sliver"
+},
+"Riven Transmuter": {
+"title": "Riven Transmuter"
+},
+"Roller Specter": {
+"title": "Roller Specter"
+},
+"Rubedo": {
+"title": "Rubedo",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nPhobos | Zeugma | Survival ( Dark Sector ) | 15 - 25 | Grineer Asteroid\nPhobos | Stickney | Survival | 10 - 15 | Corpus Ship"
+},
+"Ruk's Claw": {
+"title": "Ruk's Claw",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resources until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nMars | Ara | Capture | 10 - 12 | Grineer Settlement\nMars | Hellas | Exterminate | 8 - 10 | Grineer Settlement"
+},
+"Rune Marrow": {
+"title": "Rune Marrow"
+},
+"Saggen Pearl": {
+"title": "Saggen Pearl"
+},
+"Salvage": {
+"title": "Salvage",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nJupiter | Cameria | Survival ( Dark Sector ) | 20 - 30 | Corpus Gas City\nMars | Wahiba | Survival ( Dark Sector ) | 10 - 20 | Corpus Ship"
+},
+"Sands Of Inaros": {
+"title": "Sands Of Inaros"
+},
+"Saturncommonavionicsendo": {
+"title": "Saturncommonavionicsendo"
+},
+"Saturnuncommonavionicsendo": {
+"title": "Saturnuncommonavionicsendo"
+},
+"Scintillant": {
+"title": "Scintillant"
+},
+"Scuttler Husk": {
+"title": "Scuttler Husk"
+},
+"Sentirum": {
+"title": "Sentirum"
+},
+"Seriglass Shard": {
+"title": "Seriglass Shard"
+},
+"Servoris": {
+"title": "Servoris"
+},
+"Sheev": {
+"title": "Sheev",
+"acq": ""
+},
+"Shelter Debt-Bond": {
+"title": "Debt-Bond"
+},
+"Shield Osprey Specter": {
+"title": "Shield Osprey Specter"
+},
+"Shockprod Fishing Spear": {
+"title": "Shockprod Fishing Spear"
+},
+"Shrill Voca": {
+"title": "Shrill Voca",
+"farm": "Target | Planet | Name | Type | Level | Tile Set\nDeimos | Nex | Exterminate | 55 - 60 | Albrecht's Laboratories\nDeimos | Effervo | Assassination | 55 - 60 | Albrecht's Laboratories\n• Non-endless missions in the Albrecht's Laboratories are recommended since players can explore the tileset after completing the objective. The Exterminate mission Nex is particularly effective as the player is naturally forced to maneuver a significant portion of the map."
+},
+"Silphsela": {
+"title": "Silphsela"
+},
+"Sister Of Parvos Token": {
+"title": "Sister Of Parvos Token"
+},
+"Skateweed Extract": {
+"title": "Skateweed Extract"
+},
+"Skiajati": {
+"title": "Skiajati",
+"acq": "This weapon, along with Excalibur Umbra, is given during the penultimate mission of The Sacrifice at max rank, complete with its own free weapon slot, a pre-installed Orokin Catalyst, and the mods Sacrificial Steel and Sacrificial Pressure fused to rank 5. A second Skiajati will not be given after replaying the quest."
+},
+"Snipetron Vandal": {
+"title": "Snipetron Vandal",
+"acq": "This weapon's blueprint and parts can currently be found as Invasion rewards.\nPreviously, this weapon was awarded as a special-edition reward for killing 20 Informers in the Informant Event, complete with a free weapon slot and a pre-installed Orokin Catalyst. The blueprint and parts were also formerly a reward from the Sixth Season of Sorties.\nAll components can be traded, although players must have a Mastery Rank of at least 5 to acquire the blueprint.\nManufacturing Requirements 📝 Edit blueprint requirements\n25,000 | 1 | 1 | 1 | | Time: 12 Hour(s)\nRush: 35\nMarket Price: N/A | Blueprints Price:N/A"
+},
+"Sola Toroid": {
+"title": "Sola Toroid"
+},
+"Somatic Fibers": {
+"title": "Somatic Fibers"
+},
+"Son Token": {
+"title": "Son Token"
+},
+"Spectral Debris": {
+"title": "Spectral Debris"
+},
+"Squad Ammo Restore (Small)": {
+"title": "Squad Ammo Restore",
+"acq": "Contents\n• 1 Acquisition\n• 1.1 Small\n• 1.2 Medium\n• 1.3 Large\nSmall\nThe reusable blueprints for 1x and 10x Squad Ammo Restore (Small) can be purchased from market for 500 Credits 500 and 250,000 Credits 250,000 respectively.\n1x Squad Ammo Restore (Small)\nManufacturing Requirements\n1,000 | 200 | 25 | | | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 500\n10x Squad Ammo Restore (Small)\nManufacturing Requirements\n9,000 | 225 | 1,800 | | | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 250,000\nMedium\nThe reusable blueprints for 1x and 10x Squad Ammo Restore (Medium) can be acquired through research in a Dojo's Chem Lab. They can be replicated (bought) for 5,000 Credits 5,000 (1x) and 250,000 Credits 250,000 (10x).\nDetonite Injector is required before researching this item.\n1x Squad Ammo Restore (Medium)\nManufacturing Requirements\n4,000 | 600 | 600 | | | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 5,000\nChem Lab Research • 3,000\nCredits 5,000 | 35 | 400 | 300 | 600 | Time: 72 hrs\nPrereq: Detonite Injector\nx1 x3 x10 x30 x100\n10x Squad Ammo Restore (Medium)\nManufacturing Requirements\n9,000 | 1,800 | 225 | | | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 250,000\nChem Lab Research • 3,000\nCredits 5,000 | 35 | 400 | 300 | 600 | Time: 72 hrs\nPrereq: 1x Squad Ammo Restore (Medium)\nx1 x3 x10 x30 x100\nLarge\nThe reusable 10x Squad Ammo Restore (Large) blueprint can be bought as a rank 3 reward for 2"
+},
+"Squad Energy Restore (Small)": {
+"title": "Squad Energy Restore",
+"acq": "Contents\n• 1 Acquisition\n• 1.1 Small\n• 1.2 Medium\n• 1.3 Large\nSmall\nThe reusable blueprints for 1x and 10x Squad Energy Restore (Small) can be purchased from market for 500 Credits 500 and 250,000 Credits 250,000 respectively.\n1x Squad Energy Restore (Small)\nManufacturing Requirements\n1,000 | 250 | 25 | | | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 500\n10x Squad Energy Restore (Small)\nManufacturing Requirements\n9,000 | 225 | 2,250 | | | Time: 2 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 250,000\nMedium\nThe reusable blueprints for 1x and 10x Squad Energy Restore (Medium) can be acquired through research in a Dojo's Energy Lab. They can be replicated (bought) for 5,000 Credits 5,000 (1x) and 250,000 Credits 250,000 (10x).\nFieldron is required before researching this item\n1x Squad Energy Restore (Medium)\nManufacturing Requirements\n4,000 | 600 | 150 | | | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 5,000\nEnergy Lab Research • 3,000\nCredits 5,000 | 25 | 80 | 200 | 500 | Time: 72 hrs\nPrereq: Fieldron\nx1 x3 x10 x30 x100\n10x Squad Energy Restore (Medium)\nManufacturing Requirements\n9,000 | 225 | 2,250 | | | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 250,000\nEnergy Lab Research • 3,000\nCredits 5,000 | 25 | 80 | 200 | 500 | Time: 72 hrs\nPrereq: 1x Squad Energy Restore (Medium)\nx1 x3 x10 x30 x100\nLarge\nThe reusable 10 x Squad Energy Restore (Large) blueprint can be bought as a rank 3 reward for"
+},
+"Squad Health Restore (Small)": {
+"title": "Squad Health Restore",
+"acq": "Contents\n• 1 Acquisition\n• 1.1 Small\n• 1.2 Medium\n• 1.3 Large\nSmall\nThe reusable blueprints for 1x and 10x Squad Health Restore (Small) can be purchased from market for 500 Credits 500 and 250,000 Credits 250,000 respectively.\n1x Squad Health Restore (Small)\nManufacturing Requirements\n1,000 | 300 | 50 | | | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 500\n10x Squad Health Restore (Small)\nManufacturing Requirements\n9,000 | 2,700 | 450 | | | Time: 2 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 250,000\nMedium\nThe reusable blueprints for 1x and 10x Squad Health Restore (Medium) can be acquired through research in a Dojo's Bio Lab. They can be replicated (bought) for 5,000 Credits 5,000 (1x) and 250,000 Credits 250,000 (10x).\nMutagen Mass is required before researching this item.\n1x Squad Health Restore (Medium)\nManufacturing Requirements\n4,000 | 500 | 600 | | | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 5,000\nBio Lab Research • 3,000\nCredits 5,000 | 30 | 200 | 750 | 400 | Time: 72 hrs\nPrereq: Mutagen Mass\nx1 x3 x10 x30 x100\n10x Squad Health Restore (Medium)\nManufacturing Requirements\n9,000 | 450 | 2,700 | | | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 250,000\nBio Lab Research • 3,000\nCredits 5,000 | 30 | 200 | 750 | 400 | Time: 72 hrs\nPrereq: 1x Squad Health Restore (Medium)\nx1 x3 x10 x30 x100\nIn-game description for Medium Health Restore states build time to be 2 minutes, however in fact "
+},
+"Squad Shield Restore (Small)": {
+"title": "Squad Shield Restore",
+"acq": "Contents\n• 1 Acquisition\n• 1.1 Small\n• 1.2 Medium\n• 1.3 Large\nSmall\nThe reusable blueprints for 1x and 10x Squad Shield Restore (Small) can be purchased from market for 500 Credits 500 and 250,000 Credits 250,000 respectively.\n1x Squad Shield Restore (Small)\nManufacturing Requirements\n1,000 | 400 | | | | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 500\n10x Squad Shield Restore (Small)\nManufacturing Requirements\n9,000 | 3,600 | | | | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 250,000\nMedium\nThe reusable blueprints for 1x and 10x Squad Shield Restore (Medium) can be acquired through research in a Dojo's Energy Lab. They can be replicated (bought) for 5,000 Credits 5,000 (1x) and 250,000 Credits 250,000 (10x).\nFieldron is required before researching this item.\n1x Squad Shield Restore (Medium)\nManufacturing Requirements\n4,000 | 600 | 150 | | | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 5,000\nEnergy Lab Research • 3,000\nCredits 5,000 | 30 | 100 | 500 | 200 | Time: 72 hrs\nPrereq: Mutagen Mass\nx1 x3 x10 x30 x100\n10x Medium Shield Restore\nManufacturing Requirements\n9,000 | 3,600 | | | | Time: 1 min\nRush: 1 Platinum 1\nMarket Price: N/A | Blueprints Price: 250,000\nEnergy Lab Research • 3,000\nCredits 5,000 | 30 | 100 | 500 | 200 | Time: 72 hrs\nPrereq: Mutagen Mass\nx1 x3 x10 x30 x100\nLarge\nThe reusable 10 x Squad Shield Restore (Large) blueprint can be bought as a rank 3 reward for 25,000 standing from Cephalon S"
+},
+"Stalker Specter": {
+"title": "Stalker Specter"
+},
+"Stance Forma": {
+"title": "Stance Forma",
+"acq": "• Stance Forma blueprint can be purchased from The Steel Path Honors shop for 10 Steel Essence.\nManufacturing Requirements\n100,000 | 1 | 1 | 5 | | Time: 24 hrs\nRush: 10 Platinum 10\nMarket Price: N/A | Blueprints Price: N/A\nHistory\n• Operation: Scarlet Spear sold a Stance Forma blueprint from Little Duck for 5,000 Scarlet Credits.\n• Operation: Orphix Venom sold a Stance Forma blueprint from Father for 1,000 Phasic Cells.\n• Operation: Gargoyle's Cry sold a Stance Forma blueprint from the Vigil Jahu Gargoyle for 3 Grotesque Splinter.\n• Operation: Belly of the Beast sold a Stance Forma blueprint from Ordis for 15 Volatile Motes. Has a purchase limit of 2.\n• Operation: Eight Claw sold a Stance Forma blueprint from Dominus Thrax for 9 Dominus Aureus. Has a purchase limit of 2."
+},
+"Star Crimzian": {
+"title": "Star Crimzian"
+},
+"Steeba": {
+"title": "Steeba",
+"acq": "The blueprint can be acquired by completing the K-Drive Race \"Pride Before a Fall\" on the Cambion Drift. Note: Active races rotate on a daily basis and thus it is not available every day.\nBlueprints can be reacquired by repeating the relevant race after the blueprint is sold or consumed. Possessing a completed component, or a K-Drive containing the component, does not prevent acquiring its blueprint again."
+},
+"Steel Essence": {
+"title": "Steel Essence"
+},
+"Stela": {
+"title": "Stela",
+"farm": "Your thirst for knowledge is as insatiable as mine.\nThese farming locations and tips are based on opinions and may not be 100% true. These should be viewed as advice and not critical facts, and results may vary from player to player.\nTarget | Planet | Name | Type | Level | Tile Set\nDeimos | Effervo | Assassination | 55 - 60 | Albrecht's Laboratories\nDeimos | Nex | Exterminate | 55 - 60 | Albrecht's Laboratories\nDeimos | Persto | Survival | 55 - 60 | Albrecht's Laboratories\n• Enemies spawned by The Fragmented have a high chance to drop Stela (~5% chance without resource drop chance boost).\n• The boss spawns more enemies in bounty and Deep Archimedea Assassination missions compared to the regular mission (perhaps the number of enemies spawned scales with mission difficulty).\n• Stalling the boss fight can help you gain more Stela from enemies.\n• The Deep Archimedea Assassination mission has possible Deviations which may indirectly increase the overall Stela gained from enemies.\n• Resource Boosters from opened Relics on Fissure missions can significantly increase the Stela drops."
+},
+"Strun Wraith": {
+"title": "Strun Wraith",
+"acq": "This weapon was first introduced from the Survival Weekend Event, awarded for completing the event's Survival for 20 minutes, complete with a free weapon slot and a pre-installed Orokin Catalyst.\nThe Strun Wraith was awarded again from acquiring 100 points in the Den of Kubrow Tactical Alert, also complete with a free weapon slot and a pre-installed Orokin Catalyst.\nThe blueprint and parts were formerly a reward from the Fourth Season of Sorties; they can now be found as an Invasion reward. All components can be traded, although players must have a Mastery Rank of at least 10 to acquire the blueprint.\nManufacturing Requirements 📝 Edit blueprint requirements\n25,000 | 1 | 1 | 1 | | Time: 12 Hour(s)\nRush: 50\nMarket Price: N/A | Blueprints Price:N/A"
+},
+"Stunna Fishing Spear": {
+"title": "Stunna Fishing Spear"
+},
+"Sunlight Dragonlily": {
+"title": "Sunlight Dragonlily",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resources until better facts are proven. Note that the Sunlight Dragonlily can only spawn when it is daytime on the Grineer Forest tileset.\nTarget | Planet | Name | Type | Level | Tile Set\nEarth | Mantle | Capture | 2 - 4 | Grineer Forest\nEarth | E Prime | Exterminate | 1 - 3 | Grineer Forest\nEarth | Cervantes | Sabotage | 4 - 6 | Grineer Forest"
+},
+"Sunlight Jadeleaf": {
+"title": "Sunlight Jadeleaf",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resources until better facts are proven. Note that the Sunlight Jadeleaf can only spawn when it is daytime on the Grineer Forest tileset.\nTarget | Planet | Name | Type | Level | Tile Set\nEarth | Mantle | Capture | 2 - 4 | Grineer Forest\nEarth | E Prime | Exterminate | 1 - 3 | Grineer Forest\nEarth | Cervantes | Sabotage | 4 - 6 | Grineer Forest"
+},
+"Sunlight Threshcone": {
+"title": "Sunlight Threshcone",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resources until better facts are proven. Note that the Sunlight Threshcone can only spawn when it is daytime on the Grineer Forest tileset.\nTarget | Planet | Name | Type | Level | Tile Set\nEarth | Mantle | Capture | 2 - 4 | Grineer Forest\nEarth | E Prime | Exterminate | 1 - 3 | Grineer Forest\nEarth | Cervantes | Sabotage | 4 - 6 | Grineer Forest"
+},
+"Sunpoint Plasma Drill": {
+"title": "Mining"
+},
+"Sunrise Apothic": {
+"title": "Apothic"
+},
+"Surge Eximus Specter": {
+"title": "Surge Eximus Specter"
+},
+"Synthula": {
+"title": "Synthula"
+},
+"Tasoma Extract": {
+"title": "Tasoma Extract"
+},
+"Tasoma Spore": {
+"title": "Tasoma Spore"
+},
+"Tear Azurite": {
+"title": "Tear Azurite"
+},
+"Technocyte Coda Token": {
+"title": "Technocyte Coda Token"
+},
+"Techrot Chitin": {
+"title": "Techrot Chitin",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven."
+},
+"Techrot Motherboard": {
+"title": "Techrot Motherboard",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resource until better facts are proven."
+},
+"Tellurium": {
+"title": "Tellurium",
+"farm": "Your thirst for knowledge is as insatiable as mine.\nThese farming locations and tips are based on opinions and may not be 100% true. These should be viewed as advice and not critical facts, and results may vary from player to player.\nTarget | Planet | Name | Type | Level | Tile Set\nUranus Proxima | The Kuva Wytch | Skirmish | 65 - 70 | Free Space\nUranus Proxima | Scoria's Angel | Skirmish | 65 - 70 | Free Space\nUranus | Ophelia | Survival | 24 - 29 | Grineer Sealab\nUranus | Caelus | Interception | 24 - 29 | Free Space\nNeptune | Salacia | Mobile Defense | 27 - 32 | Corpus Ship (Archwing)\nKuva Fortress | Tamu | Disruption | 35 - 40 | Grineer Asteroid Fortress\nVeil Proxima | Lu-yan | Survival | 55 - 59 | Free Space\nNote: Steel Path grants much higher enemy density and +100% resource drop chance. Anecdotally this turns out to be around 4x higher drop rate on Ophelia. Uranus Proxima missions also yield regular drops, while also offering other resources and currency."
+},
+"Tempered Bapholite": {
+"title": "Tempered Bapholite"
+},
+"Temporal Dust": {
+"title": "Temporal Dust"
+},
+"Tenet Agendus": {
+"title": "Tenet Agendus",
+"acq": "Tenet Agendus is purchased from Ergo Glast of The Perrin Sequence in any Relay for 40 Corrupted Holokey obtained from Empyrean Void Storm missions (regardless of standing with The Perrin Sequence syndicate). Each offering has a random progenitor bonus damage type and percentage increase, which is cycled every 4 days.\nDecember 3, 2015 00:00:00 UTCTime until next progenitor bonus damage cycling in Ergo Glast's offerings:\n4D-1D hh mm ssfull\nCurrent Valence Bonuses\nThese values are player-reported\nWeapon | Element | Bonus %\nTenet Ferrox | Electricity | 30.8%\nTenet Grigori | Toxin | 27.8%\nTenet Livia | Heat | 27.1%\nTenet Exec | Magnetic | 28.8%\nTenet Agendus | Toxin | 57.6%\nCombos\nDefault Combos of Stance or Weapon (📝 Edit Stance Data)\nCombo /Attack | Name | Attack Multipliers and Forced Procs | Avg Dmg Multi/s | Length @ 1.0 Attack Speed | Animation\nHeavy ( Heavy Attack ) | Tenet Agendus Heavy (unofficial) | 500% | 500% | | N/A | N/A\nDefault \"Sweep\" Attack • 360°/Spin Attack • Direct and Radial Slam Attack • Ranged Attack • \"Thrust\" Attack View Full Legend Key Inputs Basic Melee (PC default LMB or E; Xbox, PlayStation, and Nintendo Switch default right button)\nHeavy Attack (PC default MMB; Xbox, PlayStation, and Nintendo Switch default left trigger)\nBlock (PC default RMB; Xbox, PlayStation, and Nintendo Switch default right trigger)\nForward Movement (PC default W; Xbox, PlayStation, and Nintendo Switch default tilt up right thumbstick)\nMultipliers and Hits\n200% Attack does double"
+},
+"Tenet Arca Plasmor": {
+"title": "Tenet Arca Plasmor",
+"acq": "Tenet Arca Plasmor is obtained by vanquishing a Sister who generated with one equipped. After the Sister is vanquished it will be in the player's Foundry ready to claim.\nWhile the weapon itself is not tradeable, a converted Sister generated with the weapon can be traded to another player. The trade is performed inside a Clan Dojo's Crimson Branch room, and the recipient must not have any active Lich or Sister. Once traded, the recipient must fight and vanquish the Sister to claim their weapon."
+},
+"Tenet Cycron": {
+"title": "Tenet Cycron",
+"acq": "Tenet Cycron is obtained by vanquishing a Sister who generated with one equipped. After the Sister is vanquished it will be in the player's Foundry ready to claim.\nWhile the weapon itself is not tradeable, a converted Sister generated with the weapon can be traded to another player. The trade is performed inside a Clan Dojo's Crimson Branch room, and the recipient must not have any active Lich or Sister. Once traded, the recipient must fight and vanquish the Sister to claim their weapon."
+},
+"Tenet Detron": {
+"title": "Tenet Detron",
+"acq": "Tenet Detron is obtained by vanquishing a Sister who generated with one equipped. After the Sister is vanquished it will be in the player's Foundry ready to claim.\nWhile the weapon itself is not tradeable, a converted Sister generated with the weapon can be traded to another player. The trade is performed inside a Clan Dojo's Crimson Branch room, and the recipient must not have any active Lich or Sister. Once traded, the recipient must fight and vanquish the Sister to claim their weapon."
+},
+"Tenet Diplos": {
+"title": "Tenet Diplos",
+"acq": "Tenet Diplos is obtained by vanquishing a Sister who generated with one equipped. After the Sister is vanquished it will be in the player's Foundry ready to claim.\nWhile the weapon itself is not tradeable, a converted Sister generated with the weapon can be traded to another player. The trade is performed inside a Clan Dojo's Crimson Branch room, and the recipient must not have any active Lich or Sister. Once traded, the recipient must fight and vanquish the Sister to claim their weapon."
+},
+"Tenet Envoy": {
+"title": "Tenet Envoy",
+"acq": "Tenet Envoy is obtained by vanquishing a Sister who generated with one equipped. After the Sister is vanquished it will be in the player's Foundry ready to claim.\nWhile the weapon itself is not tradeable, a converted Sister generated with the weapon can be traded to another player. The trade is performed inside a Clan Dojo's Crimson Branch room, and the recipient must not have any active Lich or Sister. Once traded, the recipient must fight and vanquish the Sister to claim their weapon."
+},
+"Tenet Exec": {
+"title": "Tenet Exec",
+"acq": "Tenet Exec is purchased from Ergo Glast of The Perrin Sequence in any Relay for 40 Corrupted Holokey obtained from Empyrean Void Storm missions (regardless of standing with The Perrin Sequence syndicate). Each offering has a random progenitor bonus damage type and percentage increase, which is cycled every 4 days.\nDecember 3, 2015 00:00:00 UTCTime until next progenitor bonus damage cycling in Ergo Glast's offerings:\n4D-1D hh mm ssfull\nCurrent Valence Bonuses\nThese values are player-reported\nWeapon | Element | Bonus %\nTenet Ferrox | Electricity | 30.8%\nTenet Grigori | Toxin | 27.8%\nTenet Livia | Heat | 27.1%\nTenet Exec | Magnetic | 28.8%\nTenet Agendus | Toxin | 57.6%\nCombos\nDefault Combos of Stance or Weapon (📝 Edit Stance Data)\nCombo /Attack | Name | Attack Multipliers and Forced Procs | Avg Dmg Multi/s | Length @ 1.0 Attack Speed | Animation\nSlam ( Looking At Ground While In Air ) | Tenet Exec Slam (unofficial) | 3x 200% | | | 0.0%/s | 2.5s\nHeavy Slam (Heavy Attack In Midair) | Tenet Exec Heavy Slam (unofficial) | 9x 300% | | | 0.0%/s | 2.5s\nDefault \"Sweep\" Attack • 360°/Spin Attack • Direct and Radial Slam Attack • Ranged Attack • \"Thrust\" Attack View Full Legend Key Inputs Basic Melee (PC default LMB or E; Xbox, PlayStation, and Nintendo Switch default right button)\nHeavy Attack (PC default MMB; Xbox, PlayStation, and Nintendo Switch default left trigger)\nBlock (PC default RMB; Xbox, PlayStation, and Nintendo Switch default right trigger)\nForward Movement (PC default W; Xb"
+},
+"Tenet Ferrox": {
+"title": "Tenet Ferrox",
+"acq": "Tenet Ferrox is purchased from Ergo Glast of The Perrin Sequence in any Relay for 40 Corrupted Holokey obtained from Empyrean Void Storm missions (regardless of standing with The Perrin Sequence syndicate). Each offering has a random progenitor bonus damage type and percentage increase, which is cycled every 4 days.\nDecember 3, 2015 00:00:00 UTCTime until next progenitor bonus damage cycling in Ergo Glast's offerings:\n4D-1D hh mm ssfull\nCurrent Valence Bonuses\nThese values are player-reported\nWeapon | Element | Bonus %\nTenet Ferrox | Electricity | 30.8%\nTenet Grigori | Toxin | 27.8%\nTenet Livia | Heat | 27.1%\nTenet Exec | Magnetic | 28.8%\nTenet Agendus | Toxin | 57.6%"
+},
+"Tenet Flux Rifle": {
+"title": "Tenet Flux Rifle",
+"acq": "Tenet Flux Rifle is obtained by vanquishing a Sister who generated with one equipped. After the Sister is vanquished it will be in the player's Foundry ready to claim.\nWhile the weapon itself is not tradeable, a converted Sister generated with the weapon can be traded to another player. The trade is performed inside a Clan Dojo's Crimson Branch room, and the recipient must not have any active Lich or Sister. Once traded, the recipient must fight and vanquish the Sister to claim their weapon."
+},
+"Tenet Glaxion": {
+"title": "Tenet Glaxion",
+"acq": "Tenet Glaxion is obtained by vanquishing a Sister who generated with one equipped. After the Sister is vanquished it will be in the player's Foundry ready to claim.\nWhile the weapon itself is not tradeable, a converted Sister generated with the weapon can be traded to another player. The trade is performed inside a Clan Dojo's Crimson Branch room, and the recipient must not have any active Lich or Sister. Once traded, the recipient must fight and vanquish the Sister to claim their weapon."
+},
+"Tenet Grigori": {
+"title": "Tenet Grigori",
+"acq": "Tenet Grigori is purchased from Ergo Glast of The Perrin Sequence in any Relay for 40 Corrupted Holokey obtained from Empyrean Void Storm missions (regardless of standing with The Perrin Sequence syndicate). Each offering has a random progenitor bonus damage type and percentage increase, which is cycled every 4 days.\nDecember 3, 2015 00:00:00 UTCTime until next progenitor bonus damage cycling in Ergo Glast's offerings:\n4D-1D hh mm ssfull\nCurrent Valence Bonuses\nThese values are player-reported\nWeapon | Element | Bonus %\nTenet Ferrox | Electricity | 30.8%\nTenet Grigori | Toxin | 27.8%\nTenet Livia | Heat | 27.1%\nTenet Exec | Magnetic | 28.8%\nTenet Agendus | Toxin | 57.6%\nCombos\nDefault Combos of Stance or Weapon (📝 Edit Stance Data)\nCombo /Attack | Name | Attack Multipliers and Forced Procs | Avg Dmg Multi/s | Length @ 1.0 Attack Speed | Animation\nHeavy ( Heavy Attack ) | Tenet Grigori (unofficial) | 600% | 600% 600% | N/A | N/A\nDefault \"Sweep\" Attack • 360°/Spin Attack • Direct and Radial Slam Attack • Ranged Attack • \"Thrust\" Attack View Full Legend Key Inputs Basic Melee (PC default LMB or E; Xbox, PlayStation, and Nintendo Switch default right button)\nHeavy Attack (PC default MMB; Xbox, PlayStation, and Nintendo Switch default left trigger)\nBlock (PC default RMB; Xbox, PlayStation, and Nintendo Switch default right trigger)\nForward Movement (PC default W; Xbox, PlayStation, and Nintendo Switch default tilt up right thumbstick)\nMultipliers and Hits\n200% Attack does double da"
+},
+"Tenet Livia": {
+"title": "Tenet Livia",
+"acq": "Tenet Livia is purchased from Ergo Glast of The Perrin Sequence in any Relay for 40 Corrupted Holokey obtained from Empyrean Void Storm missions (regardless of standing with The Perrin Sequence syndicate). Each offering has a random progenitor bonus damage type and percentage increase, which is cycled every 4 days.\nDecember 3, 2015 00:00:00 UTCTime until next progenitor bonus damage cycling in Ergo Glast's offerings:\n4D-1D hh mm ssfull\nCurrent Valence Bonuses\nThese values are player-reported\nWeapon | Element | Bonus %\nTenet Ferrox | Electricity | 30.8%\nTenet Grigori | Toxin | 27.8%\nTenet Livia | Heat | 27.1%\nTenet Exec | Magnetic | 28.8%\nTenet Agendus | Toxin | 57.6%"
+},
+"Tenet Plinx": {
+"title": "Tenet Plinx",
+"acq": "Tenet Plinx is obtained by vanquishing a Sister who generated with one equipped. After the Sister is vanquished it will be in the player's Foundry ready to claim.\nWhile the weapon itself is not tradeable, a converted Sister generated with the weapon can be traded to another player. The trade is performed inside a Clan Dojo's Crimson Branch room, and the recipient must not have any active Lich or Sister. Once traded, the recipient must fight and vanquish the Sister to claim their weapon."
+},
+"Tenet Quanta": {
+"title": "Tenet Quanta",
+"acq": "Tenet Quanta is obtained by vanquishing a Sister who generated with one equipped. After the Sister is vanquished it will be in the player's Foundry ready to claim.\nWhile the weapon itself is not tradeable, a converted Sister generated with the weapon can be traded to another player. The trade is performed inside a Clan Dojo's Crimson Branch room, and the recipient must not have any active Lich or Sister. Once traded, the recipient must fight and vanquish the Sister to claim their weapon."
+},
+"Tenet Spirex": {
+"title": "Tenet Spirex",
+"acq": "Tenet Spirex is obtained by vanquishing a Sister who generated with one equipped. After the Sister is vanquished it will be in the player's Foundry ready to claim.\nWhile the weapon itself is not tradeable, a converted Sister generated with the weapon can be traded to another player. The trade is performed inside a Clan Dojo's Crimson Branch room, and the recipient must not have any active Lich or Sister. Once traded, the recipient must fight and vanquish the Sister to claim their weapon."
+},
+"Tenet Tetra": {
+"title": "Tenet Tetra",
+"acq": "Tenet Tetra is obtained by vanquishing a Sister who generated with one equipped. After the Sister is vanquished it will be in the player's Foundry ready to claim.\nWhile the weapon itself is not tradeable, a converted Sister generated with the weapon can be traded to another player. The trade is performed inside a Clan Dojo's Crimson Branch room, and the recipient must not have any active Lich or Sister. Once traded, the recipient must fight and vanquish the Sister to claim their weapon."
+},
+"Tepa Nodule": {
+"title": "Tepa Nodule"
+},
+"Tertium": {
+"title": "Tertium"
+},
+"Test Forma": {
+"title": "Test Forma"
+},
+"Thalys": {
+"title": "Thalys",
+"acq": "Thalys' blueprint is purchased from Acrithis or Dominus Thrax in the Dormizone for 96 Scuttler Husk awarded from Isleweaver in Duviri. Access requires completion of The Hex Quest.\nManufacturing Requirements 📝 Edit blueprint requirements\n20,000 | Temporal Dust 100 | Entrati Obols 1,500 | Silphsela 180 | Rune Marrow 150 | Time: 1 Day(s)\nRush: 35\nMarket Price: N/A | Blueprints Price:N/A"
+},
+"Thaumic Distillate": {
+"title": "Thaumic Distillate"
+},
+"Thaumica": {
+"title": "Thaumica"
+},
+"The Countessa Comic": {
+"title": "The Countessa Comic"
+},
+"The Jordas Precept": {
+"title": "The Jordas Precept"
+},
+"The Limbo Theorem": {
+"title": "The Limbo Theorem"
+},
+"The Silver Grove": {
+"title": "The Silver Grove"
+},
+"Thermal Sludge": {
+"title": "Thermal Sludge"
+},
+"Thrax Plasm": {
+"title": "Thrax Plasm",
+"farm": "Target | Planet | Name | Type | Level | Tile Set\nZariman | Tuvul Commons | Void Cascade | 50 - 55 | Zariman (Tileset)\nZariman | The Greenway | Mobile Defense | 50 - 55 | Zariman (Tileset)"
+},
+"Thyst": {
+"title": "Thyst"
+},
+"Tiametrite": {
+"title": "Tiametrite"
+},
+"Ticor Plate": {
+"title": "Ticor Plate"
+},
+"Titan Extractor Prime": {
+"title": "Extractor"
+},
+"Titanium": {
+"title": "Titanium"
+},
+"Trachons": {
+"title": "Trachons"
+},
+"Training Debt-Bond": {
+"title": "Debt-Bond"
+},
+"Travocyte Alloy": {
+"title": "Travocyte Alloy"
+},
+"Travoride": {
+"title": "Travoride"
+},
+"Trembera Essence": {
+"title": "Trembera Essence"
+},
+"Tulok Fishing Spear": {
+"title": "Tulok Fishing Spear"
+},
+"Twilight Apothic": {
+"title": "Apothic"
+},
+"Twilight Bait": {
+"title": "Fishing"
+},
+"Twin Vipers Wraith": {
+"title": "Twin Vipers Wraith",
+"acq": "Blueprints and components are a potential Invasion reward. All components can be traded, although players must have a Mastery Rank of at least 7 to acquire the blueprint.\nManufacturing Requirements 📝 Edit blueprint requirements\n25,000 | 1 | 1 | 1 | | Time: 12 Hour(s)\nRush: 50\nMarket Price: N/A | Blueprints Price:N/A"
+},
+"Ueymag": {
+"title": "Ueymag"
+},
+"Umbra Forma": {
+"title": "Umbra Forma",
+"acq": "Contents\n• 1 Acquisition\n• 1.1 Completed\n• 1.2 Blueprint\n• 1.3 Other\nCompleted\n• Rewarded at certain season-dependent ranks from Nightwave.\n• 3 Umbra Forma are awarded for qualifying in the Mastery Rank 30 test.\n• 1 Umbra Forma purchaseable from Operational Supply for 20,000 Standing 20,000 during Operation: Plague Star.\nBlueprint\n• Purchased from The Steel Path Honors Shop for 150 Steel Essence when available once every 8 weeks.\n• The next update to the steel path honors can be seen from the Relevant page.\n• Event & Drop Announcements: For manual developer-scheduled events (like Operation: Plague Star re-runs or one-off Twitch Drop alerts), monitor the official **Digital Extremes News Hub** or the Devstream index page for upcoming broadcast dates.\nOther\n• Occasionally, DE's high profile streams such as DevStreams or TennoCon will provide an Umbra Forma or blueprint, either directly from watching the stream via Twitch or from an in-game Alert afterwards. So players who are in need of Umbra Forma are encouraged to periodically check the official forums for upcoming opportunities: https://forums.warframe.com/forum/113-livestreams/\nManufacturing Requirements\n35,000 | 1 | 1 | 500 | 1,100 | Time: 24 hrs\nRush: 10 Platinum 10\nMarket Price: N/A | Blueprints Price: N/A\nNovember 16, 2020 0:00:00 UTCTime until Umbra Forma Blueprint is available:\nUmbra Forma Blueprint is available in Teshin's offerings for\n7D-156DDD hh mm ssfull"
+},
+"Uncommonfusionbundle": {
+"title": "Uncommonfusionbundle"
+},
+"Urga Bracket": {
+"title": "Urga Bracket"
+},
+"Uriel": {
+"title": "Uriel",
+"acq": ""
+},
+"Vasca Curative": {
+"title": "Vasca Virus"
+},
+"Vauban": {
+"title": "Vauban",
+"acq": ""
+},
+"Vega Toroid": {
+"title": "Vega Toroid"
+},
+"Venerdo Alloy": {
+"title": "Venerdo Alloy"
+},
+"Venerol": {
+"title": "Venerol"
+},
+"Veridos": {
+"title": "Veridos"
+},
+"Vessel Capillaries": {
+"title": "Vessel Capillaries"
+},
+"Vestan Moss": {
+"title": "Vestan Moss",
+"farm": "These are based on opinions and may not be 100% true. These should be viewed as advice for finding the resources until better facts are proven.\nTarget | Planet | Name | Type | Level | Tile Set\nMercury | M Prime | Exterminate | 7 - 9 | Grineer Asteroid\nMercury | Caloris | Rescue | 6 - 8 | Grineer Asteroid\nCeres | Draco | Survival | 12 - 17 | Grineer Asteroid"
+},
+"Vestigial Motes": {
+"title": "Vestigial Motes"
+},
+"Vitus Essence": {
+"title": "Vitus Essence"
+},
+"Void Traces": {
+"title": "Void Traces"
+},
+"Voidgel Orb": {
+"title": "Voidgel Orb",
+"farm": "Your thirst for knowledge is as insatiable as mine.\nThese farming locations and tips are based on opinions and may not be 100% true. These should be viewed as advice and not critical facts, and results may vary from player to player.\nTarget | Planet | Name | Type | Level | Tile Set\nZariman | Halako Perimeter | Exterminate | 50 - 55 | Zariman (Tileset)\nZariman | The Greenway | Mobile Defense | 50 - 55 | Zariman (Tileset)"
+},
+"Voidplume Crest": {
+"title": "Voidplume Crest",
+"farm": "Target | Planet | Name | Type | Level | Tile Set\nZariman | Halako Perimeter | Exterminate | 50 - 55 | Zariman (Tileset)\nZariman | The Greenway | Mobile Defense | 50 - 55 | Zariman (Tileset)\n• Non-endless missions in the Zariman are recommended since players can explore the tileset after completing the objective. The Exterminate mission Halako Perimeter is particularly effective as the player is naturally forced to maneuver a significant portion of the map."
+},
+"Voidplume Down": {
+"title": "Voidplume Down",
+"farm": "Target | Planet | Name | Type | Level | Tile Set\nZariman | Halako Perimeter | Exterminate | 50 - 55 | Zariman (Tileset)\nZariman | The Greenway | Mobile Defense | 50 - 55 | Zariman (Tileset)\n• Non-endless missions in the Zariman are recommended since players can explore the tileset after completing the objective. The Exterminate mission Halako Perimeter is particularly effective as the player is naturally forced to maneuver a significant portion of the map."
+},
+"Voidplume Pinion": {
+"title": "Voidplume Pinion"
+},
+"Voidplume Quill": {
+"title": "Voidplume Quill"
+},
+"Voidplume Vane": {
+"title": "Voidplume Vane",
+"farm": "Target | Planet | Name | Type | Level | Tile Set\nZariman | Halako Perimeter | Exterminate | 50 - 55 | Zariman (Tileset)\nZariman | The Greenway | Mobile Defense | 50 - 55 | Zariman (Tileset)\n• Non-endless missions in the Zariman are recommended since players can explore the tileset after completing the objective. The Exterminate mission Halako Perimeter is particularly effective as the player is naturally forced to maneuver a significant portion of the map."
+},
+"Voidrig Capsule": {
+"title": "Voidrig Capsule"
+},
+"Voidrig Casing": {
+"title": "Voidrig Casing"
+},
+"Voidrig Engine": {
+"title": "Voidrig Engine"
+},
+"Voidrig Weapon Pod": {
+"title": "Voidrig Weapon Pod"
+},
+"Volatile Motes": {
+"title": "Volatile Motes"
+},
+"Wanz Stabilizer": {
+"title": "Wanz Stabilizer"
+},
+"Xenorhast": {
+"title": "Xenorhast"
+},
+"Yao Shrub": {
+"title": "Yao Shrub"
+},
+"Zarimandogtag": {
+"title": "Zarimandogtag"
+},
+"Zenith Granum Crown": {
+"title": "Granum Crown"
+},
+"Zodian": {
+"title": "Zodian"
+},
+"Zubb Bracket": {
+"title": "Zubb Bracket"
 }
 }

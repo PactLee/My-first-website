@@ -844,7 +844,10 @@ ACQ_LABELS = [
     (r"Prime Resurgence|Varzia", "프라임 리서전스(Varzia)"),
     (r"Nightwave", "나이트웨이브"),
     (r"Invasion", "침공 보상"),
-    (r"Tenno Lab|Bio Lab|Chem Lab|Energy Lab|Orokin Lab|Clan Dojo|\bDojo\b|research", "클랜 도장 연구"),
+    (r"Tenno Lab|Bio Lab|Chem Lab|Energy Lab|Orokin Lab|Dagath's Hollow|\bresearch(ed)? in\b|\bresearch(ed)?\b(?! the)", "클랜 도장 연구"),
+    (r"Hai-?Luk", "어부 하일루크"),
+    (r"K-Drive Race", "K-드라이브 레이스"),
+    (r"\bStanding\b", "신디케이트 평판 상점"),
     (r"Daily Tribute|login reward", "출석 보상"),
     (r"Arbitration", "중재 보상"),
     (r"Steel Path", "강철의 길"),
@@ -868,7 +871,7 @@ ACQ_LABELS = [
 ]
 
 
-BOX_LINE = re.compile(r"Manufacturing Requirements|Edit blueprint|^Rush:|Market Price|Blueprints? Price|^Time:|^[\d,.\s]+$|📝|Sell Price", re.I)
+BOX_LINE = re.compile(r"Manufacturing Requirements|Edit blueprint|^Rush:|Market Price|Blueprints? Price|^Time:|^[\d,.\s]+$|📝|Sell Price|^Contents\b|^\d+(\.\d+)* [A-Z]", re.I)
 
 
 def acq_info(text):
@@ -879,7 +882,11 @@ def acq_info(text):
         m = re.search(pat, text, flags=re.I)
         if m and label not in [h[1] for h in hits]:
             hits.append((m.start(), label))
-    labels = [h[1] for h in sorted(hits)[:4]]
+    labels = [h[1] for h in sorted(hits)]
+    # 거래는 다른 획득 방법이 있으면 덧붙이는 정보일 뿐이라 뒤로 보낸다
+    if len(labels) > 1 and "플레이어 거래" in labels:
+        labels = [x for x in labels if x != "플레이어 거래"] + ["플레이어 거래"]
+    labels = labels[:4]
     # 원문 앞부분 2문장 정도 (출처 표시와 함께 보여준다)
     body = " ".join(ln for ln in text.split("\n") if "|" not in ln)
     sents = re.split(r"(?<=[.!?])\s+", body.strip())
@@ -907,7 +914,8 @@ def farm_rows(text):
         if not pk or not node:
             continue
         mk = tr_mtype(mtype)
-        rows.append([pk, node, mk, level, f"{pk}/{node} ({mk})"])
+        main = re.sub(r"\s*\(.*\)$", "", mk)
+        rows.append([pk, node, mk, level, f"{pk}/{node} ({main})"])
     return rows[:10]
 
 

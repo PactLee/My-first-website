@@ -14,7 +14,8 @@
   - 제작 트리: 재료 종류(제작/정제 자원/파밍 자원/파밍 부품/설계도 구매)를 색으로 구분
   - 제작 계획: 부품(섀시·뉴로옵틱스·시스템), 정제 자원(타우믹 디스틸레이트 등), 재료로 쓰이는 무기까지 끝까지 펼쳐 필요 자원·크레딧·제작 순서·최소 소요 시간 계산, 보유 체크(브라우저에 저장)
   - 드랍 외 획득처: 신디케이트 상점(등급·평판), 클랜 도장 연구(복제 크레딧), 행성 정보
-  - 제작 계획의 "지금 갈 곳": 남은 재료를 한 번에 많이 얻을 수 있는 장소 추천
+  - 제작 계획의 "지금 갈 곳": 남은 재료를 한 번에 많이 얻을 수 있는 장소 추천 (위키 추천 노드 우선)
+  - WARFRAME 위키 보강: 공식 데이터에 없는 획득 방법(퀘스트·이벤트·쿠바 리치·나이트웨이브 등)과 자원별 추천 파밍 노드 (CC BY-SA, 출처 링크 표시)
   - 공식 위키 / 팬덤 위키 바로가기
 
 ## 실행
@@ -40,6 +41,9 @@ tar xzf wfcd-items-*.tgz
 # 부품(섀시 등) 제작 레시피용 공식 Public Export 데이터
 mkdir pep && (cd pep && npm pack warframe-public-export-plus && tar xzf *.tgz)
 python3 warframe/tools/build_data.py package/data/json pep/package
+# (선택) WARFRAME 위키에서 획득 방법·추천 파밍 장소 수집 (data/ 를 한 번 만든 뒤, 약 15분)
+python3 warframe/tools/fetch_wiki.py
+python3 warframe/tools/build_data.py package/data/json pep/package
 # (선택) 이미지 서버를 못 쓰는 환경용 대체 이미지 묶음 (2018년 패키지 이미지)
 mkdir old && (cd old && npm pack warframe-items@1.26.0 && tar xzf *.tgz)
 python3 warframe/tools/build_images.py old/package/data package/data/json
@@ -56,6 +60,6 @@ python3 warframe/tools/build_images.py old/package/data package/data/json
 
 - 노드 이름은 게임에서도 영어를 쓰므로 영어로 표기합니다. 공식 번역이 없는 일부 적·장소 이름도 영어로 남습니다.
 - 이미지는 cdn.warframestat.us에서 불러오고, 막혀 있으면 data/img.json의 대체 이미지(2018년 이전 아이템 중 같은 아이템으로 확인된 약 2,500개)를 씁니다. 그 이후 아이템은 이미지 서버에 접속할 수 있을 때만 보입니다.
-- 낚시 핫스팟 지도 등 위키에만 있는 세부 정보는 포함되어 있지 않습니다(위키 링크로 안내).
+- 위키 발췌는 영어 원문 키워드로 분류한 것이라 원문 전체는 "위키 원문 보기"와 위키 링크에서 확인하세요.
 
 Warframe은 Digital Extremes의 상표이며, 이 도우미는 비공식 팬 제작물입니다.
