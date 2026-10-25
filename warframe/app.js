@@ -179,16 +179,28 @@ function dropShort(d) {
   return `${esc(d[0])} <span class="muted">${pct(d[1])}</span>${vt}`;
 }
 
+// 하위 제작법(부품 레시피, 재료로 쓰이는 무기의 레시피)을 들여쓴 목록으로 보여준다
+function subBuild(b, depth = 0) {
+  if (!b) return '';
+  const items = b.l.map((x) => {
+    const name = x.id != null ? itemLink(x.id) : esc(x.n);
+    return `<li>${name} <span class="muted">× ${fmt(x.q)}</span>${x.b ? subBuild(x.b, depth + 1) : ''}</li>`;
+  }).join('');
+  return `<div class="sub-build"><div class="sub-head">제작: 크레딧 ${fmt(b.cr)} · ${duration(b.tm)}${b.q > 1 ? ` · ${b.q}개 생산` : ''}</div><ul>${items}</ul></div>`;
+}
+
 function componentBlock(row) {
   if (row.id != null) {
     const r = state.byId.get(row.id);
     return `<div class="comp"><div class="comp-head">${img(r && r[5], 'thumb')}<div>${itemLink(row.id)}
       ${r && r[1] !== r[2] ? `<div class="r-sub">${esc(r[2])}</div>` : ''}</div><span class="qty">× ${fmt(row.q)}</span></div>
-      <div class="r-sub">클릭하면 이 재료의 획득처를 볼 수 있습니다.</div></div>`;
+      ${row.b ? `<div class="r-sub">이 재료도 먼저 제작해야 합니다. 이름을 누르면 부품 획득처를 볼 수 있습니다.</div>${subBuild(row.b)}`
+        : '<div class="r-sub">클릭하면 이 재료의 획득처를 볼 수 있습니다.</div>'}</div>`;
   }
   const extra = [row.tr ? '거래 가능' : '', row.du ? `두캇 ${row.du}` : ''].filter(Boolean).join(' · ');
   return `<div class="comp"><div class="comp-head">${img(row.img, 'thumb')}<div><b>${esc(row.n)}</b>
       <div class="r-sub">${esc(row.e)}${extra ? ' · ' + esc(extra) : ''}</div></div><span class="qty">× ${fmt(row.q)}</span></div>
+      ${row.b ? `<div class="r-sub">설계도를 얻은 뒤 주조소에서 이 부품을 먼저 제작합니다.</div>${subBuild(row.b)}` : ''}
       ${row.dr ? `<details${row.dr.length <= 6 ? ' open' : ''}><summary>획득처 ${row.dr.length}곳 (${row.dr[0][4] && row.dr[0][4].vt ? '모두 볼트됨' : `추천: ${esc(row.dr[0][0])} ${pct(row.dr[0][1])}`})</summary>${dropsTable(row.dr, { limit: 8 })}</details>`
       : '<div class="r-sub">드랍 정보 없음 — 보통 시장(크레딧 구매), 퀘스트 보상 또는 상인/신디케이트에서 얻습니다. 위키를 참고하세요.</div>'}</div>`;
 }
@@ -261,7 +273,7 @@ async function renderDetail(id) {
     h += `<h2>제작 방법 (주조소)</h2>
       <p>크레딧 <b>${fmt(rec.b.cr)}</b> · 제작 시간 <b>${duration(rec.b.tm)}</b>${rec.b.q > 1 ? ` · 1회 제작 시 <b>${rec.b.q}개</b>` : ''}</p>
       ${rec.b.l.map(componentBlock).join('')}
-      ${rec.b.l.some((x) => x.id == null && !/Blueprint$/.test(x.e)) ? `<p class="muted">부품(섀시·시스템 등)을 만드는 데 필요한 세부 자원은 이 데이터에 포함되어 있지 않습니다. 위키 링크에서 확인하세요.</p>` : ''}`;
+      ${rec.b.l.some((x) => x.id == null && !x.b && !x.dr && !/Blueprint$/.test(x.e)) ? `<p class="muted">부품(섀시·시스템 등)을 만드는 데 필요한 세부 자원은 이 데이터에 포함되어 있지 않습니다. 위키 링크에서 확인하세요.</p>` : ''}`;
   }
 
   if (rec.rw) {
@@ -325,20 +337,18 @@ function updatePlanBadge() {
   b.textContent = n;
 }
 
-async function expand(rec, mult, acc, depth = 0) {
-  if (!rec.b || depth > 5) {
-    acc.direct.push({ rec, q: mult });
-    return;
-  }
-  const times = Math.ceil(mult / (rec.b.q || 1));
-  acc.credits += rec.b.cr * times;
-  acc.time = Math.max(acc.time, rec.b.tm);
-  for (const row of rec.b.l) {
+// 제작 트리를 끝까지 펼쳐 크레딧·자원·파밍할 부품·제작 단계를 모은다.
+// 반환값은 이 단계까지 걸리는 최소 시간(하위 제작은 동시에 돌린다고 가정).
+async function expandBuild(name, b, mult, acc, depth = 0) {
+  const times = Math.ceil(mult / (b.q || 1));
+  acc.credits += b.cr * times;
+  let longestChild = 0;
+  for (const row of b.l) {
     const need = row.q * times;
     if (row.id != null) {
-      const sub = await getRecord(row.id);
+      const sub = depth < 6 ? await getRecord(row.id) : null;
       if (sub && EXPAND_CATS.has(sub.c) && sub.b) {
-        await expand(sub, need, acc, depth + 1);
+        longestChild = Math.max(longestChild, await expandBuild(sub.n, sub.b, need, acc, depth + 1));
       } else {
         acc.res.set(row.id, (acc.res.get(row.id) || 0) + need);
       }
@@ -346,8 +356,19 @@ async function expand(rec, mult, acc, depth = 0) {
       const key = row.e;
       const ex = acc.parts.get(key);
       if (ex) ex.q += need; else acc.parts.set(key, { ...row, q: need });
+      if (row.b) longestChild = Math.max(longestChild, await expandBuild(row.n, row.b, need, acc, depth + 1));
     }
   }
+  acc.steps.push({ n: name, times: times * (b.q || 1), cr: b.cr * times, tm: b.tm, depth });
+  return b.tm + longestChild;
+}
+
+async function expand(rec, mult, acc) {
+  if (!rec.b) {
+    acc.direct.push({ rec, q: mult });
+    return;
+  }
+  acc.time = Math.max(acc.time, await expandBuild(rec.n, rec.b, mult, acc, 0));
 }
 
 async function renderPlan() {
@@ -359,7 +380,7 @@ async function renderPlan() {
     return;
   }
   el.innerHTML = '<p class="muted">계산 중…</p>';
-  const acc = { credits: 0, time: 0, res: new Map(), parts: new Map(), direct: [] };
+  const acc = { credits: 0, time: 0, res: new Map(), parts: new Map(), direct: [], steps: [] };
   const recs = [];
   for (const x of p) {
     const rec = await getRecord(x.id);
@@ -375,7 +396,7 @@ async function renderPlan() {
   let h = `<div class="plan-grid"><div class="card"><h2>목표 아이템</h2>
     ${recs.map(([r, q]) => `<div class="plan-row">${img(r.img, 'thumb')}<span class="grow">${itemLink(r.id, r.n)}<span class="r-sub">${esc(r.e)}</span></span>
       <input type="number" min="1" value="${q}" data-plan-q="${r.id}"><button class="btn small" data-plan-del="${r.id}">삭제</button></div>`).join('')}
-    <p>총 제작 크레딧 <b>${fmt(acc.credits)}</b>${acc.time ? ` · 가장 긴 제작 시간 <b>${duration(acc.time)}</b>` : ''}</p>
+    <p>총 제작 크레딧 <b>${fmt(acc.credits)}</b> (부품·하위 무기 포함)${acc.time ? `<br>최소 소요 시간 <b>${duration(acc.time)}</b> <span class="muted">(부품을 동시에 제작할 때)</span>` : ''}</p>
     <button class="btn small" data-plan-clear>계획 비우기</button></div>
     <div class="card"><h2>필요 자원 합계</h2>
     ${resRows.length ? `<table><thead><tr><th></th><th>자원</th><th class="num">수량</th></tr></thead><tbody>
@@ -386,9 +407,16 @@ async function renderPlan() {
   if (acc.parts.size) {
     h += `<div class="card" style="margin-top:16px"><h2>파밍해야 할 부품·설계도</h2>
       <table><thead><tr><th></th><th>부품</th><th class="num">수량</th><th>최고 확률 획득처</th></tr></thead><tbody>
-      ${[...acc.parts.values()].map((x) => `<tr class="${have['p' + x.e] ? 'have' : ''}"><td>${chk('p' + x.e)}</td><td>${esc(x.n)}<div class="r-sub">${esc(x.e)}</div></td>
+      ${[...acc.parts.values()].map((x) => `<tr class="${have['p' + x.e] ? 'have' : ''}"><td>${chk('p' + x.e)}</td><td>${esc(x.n)}${x.b ? ' <span class="tag">설계도 파밍 → 제작</span>' : ''}<div class="r-sub">${esc(x.e)}</div></td>
         <td class="num">${fmt(x.q)}</td><td>${x.dr ? x.dr.slice(0, 3).map(dropShort).join('<br>') : '<span class="muted">드랍 정보 없음 (시장/퀘스트 등)</span>'}</td></tr>`).join('')}
       </tbody></table></div>`;
+  }
+  if (acc.steps.length) {
+    const steps = [...acc.steps].sort((a, b) => b.depth - a.depth);
+    h += `<div class="card" style="margin-top:16px"><h2>제작 순서 (주조소)</h2>
+      <table><thead><tr><th>단계</th><th>제작할 것</th><th class="num">개수</th><th class="num">크레딧</th><th class="num">시간</th></tr></thead><tbody>
+      ${steps.map((x) => `<tr><td>${Math.max(...steps.map((y) => y.depth)) - x.depth + 1}</td><td>${esc(x.n)}</td><td class="num">${fmt(x.times)}</td><td class="num">${fmt(x.cr)}</td><td class="num">${duration(x.tm)}</td></tr>`).join('')}
+      </tbody></table><p class="muted">같은 단계의 제작은 주조소에서 동시에 진행할 수 있습니다.</p></div>`;
   }
   if (acc.direct.length) {
     h += `<div class="card" style="margin-top:16px"><h2>직접 획득해야 하는 항목</h2>

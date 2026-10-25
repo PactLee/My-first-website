@@ -7,9 +7,13 @@ WFCD warframe-items 패키지(@wfcd/items, npm)의 data/json 폴더를 읽어
 이름 규칙: 공식 한국어 번역(i18n/ko.json)이 있으면 그것을 사용하고,
 없으면 영어 원문 명칭을 그대로 사용한다.
 
+부품(섀시·시스템 등) 제작 레시피는 공식 Public Export를 정리한
+warframe-public-export-plus 패키지의 ExportRecipes.json에서 가져온다(선택).
+
 사용법:
     npm pack @wfcd/items && tar xzf wfcd-items-*.tgz
-    python3 warframe/tools/build_data.py package/data/json
+    mkdir pep && cd pep && npm pack warframe-public-export-plus && tar xzf *.tgz && cd ..
+    python3 warframe/tools/build_data.py package/data/json pep/package
 """
 import json
 import os
@@ -18,6 +22,7 @@ import sys
 from collections import defaultdict
 
 SRC = sys.argv[1] if len(sys.argv) > 1 else "package/data/json"
+PEP = sys.argv[2] if len(sys.argv) > 2 else None  # warframe-public-export-plus 폴더 (선택)
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
 
 IMG_BASE = "https://cdn.warframestat.us/img/"
@@ -177,6 +182,14 @@ for it in by_unique.values():
         ko_by_en.setdefault(clean(it.get("name")), clean(k))
 
 components = {c["uniqueName"]: c for c in load("Components.json")}
+
+# 결과물 uniqueName → 공식 레시피 (부품 제작 재료용)
+recipe_of = {}
+if PEP:
+    with open(os.path.join(PEP, "ExportRecipes.json"), encoding="utf-8") as f:
+        for key, rcp in json.load(f).items():
+            if rcp.get("ingredients") and rcp.get("buildPrice") is not None:
+                recipe_of.setdefault(rcp["resultType"], rcp)
 relics_raw = load("Relics.json")
 nodes = load("Node.json")
 
@@ -365,6 +378,27 @@ def comp_display(cu, parent):
 
 aliases = defaultdict(list)  # id → 추가 검색어 (부품 이름 등)
 
+
+def recipe_build(result_unique, parent):
+    """부품(섀시 등)을 만드는 공식 레시피 → {"cr", "tm", "q", "l": [재료]}"""
+    rcp = recipe_of.get(result_unique)
+    if not rcp:
+        return None
+    rows = []
+    for ing in rcp["ingredients"]:
+        iu, cnt = ing["ItemType"], ing.get("ItemCount", 1)
+        row = {"q": cnt}
+        if iu in index_of:
+            row["id"] = index_of[iu]
+            used_in[iu].add(index_of[parent["uniqueName"]])
+        elif iu in components:
+            row["n"] = comp_display(iu, parent)
+            row["e"] = f"{parent.get('name')} {components[iu]['name']}"
+        else:
+            row["n"] = row["e"] = iu.rsplit("/", 1)[-1]
+        rows.append(row)
+    return {"cr": rcp.get("buildPrice") or 0, "tm": rcp.get("buildTime") or 0, "q": rcp.get("num") or 1, "l": rows}
+
 for u in order:
     it = by_unique[u]
     cat = category_of[u]
@@ -450,9 +484,21 @@ for u in order:
                 aliases[rid].append(row["n"])
                 aliases[rid].append(row["e"])
                 add_relic_reward(u, cu, comp.get("drops"))
+                part_build = recipe_build(cu, it)
+                if part_build:
+                    row["b"] = part_build
             else:
                 row["n"] = row["e"] = cu.rsplit("/", 1)[-1]
             b["l"].append(row)
+        # 같은 재료가 여러 줄로 나뉜 경우(예: 아크브롱코 프라임의 브롱코 프라임 2개) 합친다
+        merged = {}
+        for row in b["l"]:
+            key = ("id", row["id"]) if "id" in row else ("e", row.get("e"))
+            if key in merged:
+                merged[key]["q"] += row["q"]
+            else:
+                merged[key] = row
+        b["l"] = list(merged.values())
         rec["b"] = b
 
     # 획득처
@@ -592,6 +638,26 @@ for u in order:
     rec = records[index_of[u]]
     for fid in rec.get("ga", {}).get("fish", []):
         records[fid]["ga"].setdefault("parts", []).append(rec["id"])
+
+# 재료로 쓰이는 무기·워프레임(예: 아크브롱코 프라임의 브롱코 프라임)은 상세 화면에서
+# 바로 보이도록 그 제작법을 재료 줄에 넣어 둔다 (깊이 2단계까지)
+EMBED_CATS = {"warframes", "primary", "secondary", "melee", "archwing", "companions"}
+
+
+def embed(build, depth):
+    for row in build["l"]:
+        rid = row.get("id")
+        if rid is None or depth <= 0:
+            continue
+        sub = records[rid]
+        if sub["c"] in EMBED_CATS and sub.get("b"):
+            row["b"] = json.loads(json.dumps(sub["b"]))
+            embed(row["b"], depth - 1)
+
+
+for rec in records:
+    if rec and rec.get("b"):
+        embed(rec["b"], 2)
 
 # 사용처
 for cu, ids in used_in.items():

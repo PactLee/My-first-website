@@ -178,6 +178,11 @@ table.kv th { width: 170px; white-space: nowrap; }
 .comp details { margin-top: 6px; }
 .comp summary { cursor: pointer; color: var(--muted); font-size: 13px; }
 
+.sub-build { margin: 8px 0 2px; padding-left: 12px; border-left: 2px solid var(--line); font-size: 14px; }
+.sub-build .sub-head { color: var(--accent); font-size: 13px; }
+.sub-build ul { margin: 4px 0; padding-left: 18px; }
+.sub-build li { margin: 2px 0; }
+
 .rar-Common { color: var(--common); }
 .rar-Uncommon { color: var(--uncommon); }
 .rar-Rare { color: var(--rare); }

@@ -11,7 +11,7 @@
   - 성유물 보상표, 자원 사용처, 적이 떨어뜨리는 아이템
   - 채광·낚시·채집: 광맥 색/지역/채굴 도구, 물고기 지역·시간대(날씨)·작살·미끼·분해 부위, 정제 설계도 판매처
     (게임 내 공식 설명문에서 추출. 검색창에 "채광", "낚시" 등을 입력하면 모아 볼 수 있음)
-  - 제작 계획: 여러 아이템의 필요 재료 합산 + 보유 체크(브라우저에 저장)
+  - 제작 계획: 부품(섀시·뉴로옵틱스·시스템)과 재료로 쓰이는 무기까지 끝까지 펼쳐 필요 자원·크레딧·제작 순서·최소 소요 시간 계산, 보유 체크(브라우저에 저장)
   - 공식 위키 / 팬덤 위키 바로가기
 
 ## 실행
@@ -34,12 +34,13 @@ GitHub Pages로 저장소를 배포하면 `/warframe/` 경로에서 바로 사�
 ```bash
 npm pack @wfcd/items
 tar xzf wfcd-items-*.tgz
-python3 warframe/tools/build_data.py package/data/json
+# 부품(섀시 등) 제작 레시피용 공식 Public Export 데이터
+mkdir pep && (cd pep && npm pack warframe-public-export-plus && tar xzf *.tgz)
+python3 warframe/tools/build_data.py package/data/json pep/package
 ```
 
 ## 알려진 한계
 
-- 일반 워프레임 부품(섀시 등)을 만드는 데 드는 세부 자원은 원본 데이터에 없어 위키 링크로 안내합니다.
 - 적 이름, 노드 이름, 일부 미션 타입은 공식 한국어 번역 데이터가 없어 영어로 표기됩니다.
 - 낚시 핫스팟 지도 등 위키에만 있는 세부 정보는 포함되어 있지 않습니다(위키 링크로 안내).
 - 이미지는 cdn.warframestat.us에서 불러옵니다.
