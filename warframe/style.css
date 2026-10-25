@@ -164,6 +164,9 @@ th, td { overflow-wrap: anywhere; text-align: left; padding: 5px 8px; border-bot
 th { color: var(--muted); font-weight: 500; }
 td.num, th.num { text-align: right; white-space: nowrap; }
 
+table.kv th { width: 170px; white-space: nowrap; }
+@media (max-width: 860px) { table.kv th { width: auto; white-space: normal; } }
+
 .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
 .stat { background: var(--panel-2); padding: 6px 10px; border-radius: 6px; }
 .stat b { display: block; font-size: 12px; color: var(--muted); font-weight: 500; }

@@ -142,6 +142,8 @@ def wiki_url(item):
 # ---------------------------------------------------------------------------
 # 1) 모든 아이템 로드 + uniqueName 인덱스
 # ---------------------------------------------------------------------------
+fish_by_name = {}       # 물고기 영어 이름 → 대표 uniqueName
+fish_sizes = defaultdict(list)
 by_unique = {}          # uniqueName → raw item (아무 파일)
 category_of = {}        # uniqueName → category key
 order = []
@@ -152,6 +154,14 @@ for fname, cat in CATEGORIES:
             continue
         if cat == "misc" and it.get("type") in MISC_SKIP_TYPES:
             continue
+        # 물고기는 크기(소/중/대)별로 같은 이름의 항목이 3개씩 있어 하나로 합친다
+        if cat == "fish":
+            first = fish_by_name.get(it.get("name"))
+            if first:
+                fish_sizes[first].append(u)
+                continue
+            fish_by_name[it.get("name")] = u
+            fish_sizes[u] = [u]
         # Misc.json 안의 자원은 자원 카테고리로
         if cat == "misc" and it.get("type") == "Resource":
             cat2 = "resources"
@@ -451,11 +461,137 @@ for u in order:
         rec["ed"] = [[en2ko.get(d.get("location"), d.get("location")), round(d.get("chance") or 0, 4), d.get("rarity") or "", d.get("type") or ""]
                      for d in sorted(it.get("drops") or [], key=lambda d: -(d.get("chance") or 0))]
     else:
-        dr = pack_drops(it.get("drops"))
+        drops = it.get("drops")
+        if cat == "fish":
+            drops = [d for d in drops or [] if d.get("type") == it.get("name")]
+        dr = pack_drops(drops)
         if dr:
             rec["dr"] = dr
         add_relic_reward(u, None, it.get("drops"))
     records[rid] = rec
+
+# ---------------------------------------------------------------------------
+# 4-1) 채광·낚시·채집 정보 — 게임 내 공식 한국어 설명(아이템·미끼·작살·도구)에서 추출
+# ---------------------------------------------------------------------------
+FISH_REGION = {
+    "Eidolon": "아이돌론의 평원 (지구)",
+    "Solaris": "오브 협곡 (금성)",
+    "Deimos": "캠비온 퇴적지 (데이모스)",
+    "Duviri": planet_ko.get("Duviri", "Duviri"),
+}
+FISH_TIME = {
+    ("Eidolon", "Day"): "낮",
+    ("Eidolon", "Night"): "밤",
+    ("Eidolon", "Both"): "낮과 밤",
+    ("Solaris", "Warm"): "따뜻한 날씨",
+    ("Solaris", "Cool"): "서늘한 날씨",
+    ("Solaris", "Both"): "따뜻한 날씨와 서늘한 날씨",
+}
+LOC_HINTS = ("획득 가능 장소", "획득할 수 있습니다", "찾을 수 있습니다", "발견됩니다", "설계도를 구매", "분해하여", "채굴할 수", "채집할 수")
+MINING_TOOLS = ["Nosam Cutter", "Focused Nosam Cutter", "Advanced Nosam Cutter", "Sunpoint Plasma Drill"]
+
+
+def sentences(text):
+    out = []
+    for line in (text or "").split("\n"):
+        for sent in re.split(r"(?<=[.!?])\s+", line.strip()):
+            if sent:
+                out.append(sent.strip())
+    return out
+
+
+def loc_sentences(text):
+    res = []
+    for sent in sentences(text):
+        if any(h in sent for h in LOC_HINTS):
+            res.append(re.sub(r"^획득 가능 장소\s*:\s*", "", sent))
+    return res
+
+
+def id_by_en(name, cat=None):
+    for u in order:
+        it = by_unique[u]
+        if clean(it.get("name")) == name and (cat is None or category_of[u] == cat):
+            return index_of[u]
+    return None
+
+
+gear_recs = [records[index_of[u]] for u in order if category_of[u] == "gear"]
+spears = [r for r in gear_recs if r["e"].endswith("Spear")]
+baits = [r for r in gear_recs if r["e"].endswith("Bait")]
+lures = [r for r in gear_recs if r["e"].endswith("Echo-Lure")]
+mining_tool_ids = [i for i in (id_by_en(n, "gear") for n in MINING_TOOLS) if i is not None]
+fish_recs = [records[index_of[u]] for u in order if category_of[u] == "fish"]
+
+
+def mentions(text, name):
+    # 다른 단어 중간에 걸리지 않도록 이름 앞이 한글이 아닌 경우만 인정 (뒤에는 조사가 붙을 수 있음)
+    return re.search(r"(?<![가-힣])" + re.escape(name), text or "") is not None
+
+
+for u in order:
+    rec = records[index_of[u]]
+    it = by_unique[u]
+    t, cat, desc = rec.get("t"), rec["c"], rec.get("d", "")
+    ga = {}
+    if cat == "fish":
+        m = re.match(r"^/Lotus/Types/Items/Fish/([^/]+)/(?:Corpus|Orokin|Solaris|Infested|Hybrid)?(Day|Night|Both|Warm|Cool)?(Common|Uncommon|Rare|Legendary)?", u)
+        region = m.group(1) if m else ""
+        ga["m"] = "낚시"
+        if region in FISH_REGION:
+            ga["reg"] = FISH_REGION[region]
+        if m and (region, m.group(2)) in FISH_TIME:
+            ga["time"] = FISH_TIME[(region, m.group(2))]
+        if m and m.group(3):
+            ga["rar"] = m.group(3)
+        if len(fish_sizes.get(u, [])) > 1:
+            ga["sz"] = len(fish_sizes[u])
+        sp = [r["id"] for r in spears if mentions(r["d"], rec["n"])]
+        if not sp and region in FISH_REGION:
+            key = FISH_REGION[region].split(" (")[0]
+            sp = [r["id"] for r in spears if key in r["d"]]
+        if sp:
+            ga["tools"] = sp
+        bt = []
+        for r in baits:
+            if mentions(r["d"], rec["n"]):
+                hint = next((x for x in sentences(r["d"]) if mentions(x, rec["n"])), "")
+                bt.append([r["id"], hint])
+        if bt:
+            ga["bait"] = bt
+    elif t == "Fish Part":
+        ga["m"] = "물고기 분해"
+        src = [f["id"] for f in fish_recs if mentions(desc, f["n"])]
+        if src:
+            ga["fish"] = src
+    elif t == "Conservation Tag":
+        ga["m"] = "동물 보호"
+        animal = re.sub(r"\s*(태그|Tag)$", "", rec["n"])
+        lr = [r["id"] for r in lures if animal and r["n"].startswith(animal.split()[0])]
+        if lr:
+            ga["tools"] = lr
+    elif rec.get("b") and "설계도를 구매" in desc:
+        ga["m"] = "정제"
+    elif t == "Gem" or re.search(r"광맥|채광|채굴|병변", desc):
+        ga["m"] = "채광"
+        ga["tools"] = mining_tool_ids
+    elif t == "Plant" or re.search(r"채집", desc):
+        ga["m"] = "채집"
+    elif cat == "resources" and any(re.search(r"아이돌론의 평원|오브 협곡|캠비온 퇴적지", x) for x in loc_sentences(desc)):
+        ga["m"] = "오픈월드 수집"
+    if not ga:
+        continue
+    locs = loc_sentences(desc)
+    if locs:
+        ga["loc"] = locs
+    rec["ga"] = ga
+    aliases[rec["id"]].append(ga["m"])
+
+# 물고기 → 분해해서 나오는 부위
+for u in order:
+    rec = records[index_of[u]]
+    for fid in rec.get("ga", {}).get("fish", []):
+        records[fid]["ga"].setdefault("parts", []).append(rec["id"])
 
 # 사용처
 for cu, ids in used_in.items():

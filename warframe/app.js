@@ -154,6 +154,26 @@ function statsBlock(st, cat) {
   return `<div class="stats">${Object.entries(st).map(([k, x]) => `<div class="stat"><b>${L[k] || k}</b>${esc(v(k, x))}</div>`).join('')}</div>`;
 }
 
+function gatherBlock(ga, rec) {
+  const idList = (ids) => ids.map((i) => itemLink(i)).join(', ');
+  const rows = [];
+  if (ga.reg) rows.push(['지역', esc(ga.reg)]);
+  if (ga.time) rows.push([ga.reg && ga.reg.startsWith('오브') ? '날씨' : '시간대', esc(ga.time)]);
+  if (ga.rar) rows.push(['희귀도', `<span class="rar-${esc(ga.rar)}">${esc(ga.rar)}</span>`]);
+  if (ga.sz) rows.push(['크기', `${ga.sz}종 (Small · Medium · Large) — 크기가 클수록 분해 시 부위를 더 많이 얻습니다`]);
+  if (ga.loc) rows.push(['장소 (게임 내 설명)', ga.loc.map(esc).join('<br>')]);
+  if (ga.tools && ga.tools.length) {
+    const label = ga.m === '낚시' ? '추천 작살' : ga.m === '동물 보호' ? '에코-루어' : '채굴 도구';
+    rows.push([label, idList(ga.tools)]);
+  }
+  if (ga.bait) rows.push(['미끼', ga.bait.map(([i, hint]) => `${itemLink(i)}${hint ? `<div class="r-sub">${esc(hint)}</div>` : ''}`).join('')]);
+  if (ga.fish) rows.push(['이 부위가 나오는 물고기', idList(ga.fish)]);
+  if (ga.parts) rows.push(['분해하면 나오는 부위', idList(ga.parts)]);
+  if (!rows.length) return '';
+  return `<h2>${esc(ga.m)} 정보</h2><table class="kv"><tbody>${rows.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</tbody></table>
+    <p class="muted">게임 내 공식 설명(아이템·미끼·작살 설명문)에서 정리한 정보입니다. 핫스팟 위치 등 자세한 지도는 위키를 참고하세요.</p>`;
+}
+
 function dropShort(d) {
   const vt = d[4] && d[4].vt ? ' <span class="tag vault">볼트됨</span>' : '';
   return `${esc(d[0])} <span class="muted">${pct(d[1])}</span>${vt}`;
@@ -220,7 +240,22 @@ async function renderDetail(id) {
   if (rec.b && !rec.bp && rec.b.l.some((x) => x.dr)) how.push('부품·설계도를 아래 획득처에서 파밍한 뒤 주조소에서 제작');
   if (rec.dr) how.push('아래 획득처에서 직접 드랍');
   if (rec.c === 'relics') how.push(rec.dr ? '아래 미션 보상으로 획득 후 보이드 균열 미션에서 개봉' : '현재 볼트됨 — 거래 또는 프라임 리서전스(Varzia)로만 획득');
+  const ga = rec.ga;
+  if (ga) {
+    const HOW = {
+      '낚시': '오픈월드에서 낚시 작살로 직접 잡기',
+      '물고기 분해': '잡은 물고기를 어부에게 가져가 분해해서 얻기',
+      '채광': '오픈월드의 광맥에서 채굴 도구로 캐기',
+      '정제': '원석을 모아 설계도로 정제(제작)하기',
+      '채집': '오픈월드에서 식물을 채집하기',
+      '오픈월드 수집': '오픈월드 현지에서 수집하기',
+      '동물 보호': '오픈월드에서 동물을 추적·진정시켜 보호하기',
+    };
+    how.unshift(`<b>${esc(ga.m)}</b>: ${esc(HOW[ga.m] || '')}`);
+  }
   if (how.length) h += `<h2>얻는 방법</h2><ul>${how.map((x) => `<li>${x}</li>`).join('')}</ul>`;
+
+  if (ga) h += gatherBlock(ga, rec);
 
   if (rec.b) {
     h += `<h2>제작 방법 (주조소)</h2>
@@ -240,7 +275,7 @@ async function renderDetail(id) {
     h += rec.ed && rec.ed.length
       ? dropsTable(rec.ed.map((d) => [d[0], d[1], d[2], d[3] && d[3] !== 'Mod Locations' ? d[3] : 0]))
       : '<p class="muted">드랍 정보가 없습니다.</p>';
-  } else if (rec.dr || rec.c !== 'relics') {
+  } else if (rec.dr || (rec.c !== 'relics' && !rec.ga)) {
     h += `<h2>획득처 (드랍 위치)</h2>${dropsTable(rec.dr)}`;
   }
 
@@ -416,6 +451,12 @@ function renderGuide() {
     <li><b>거래 가능</b> 표시가 있는 프라임 부품·모드는 플레이어 간 거래로 구할 수 있습니다. 쓰지 않는 프라임 부품은 릴레이의 두캇 키오스크에서 두캇으로 바꿔 Baro Ki'Teer 상점에서 쓸 수 있습니다.</li>
     <li>보스 부품(대부분 일반 워프레임)은 해당 행성 암살 미션 보스가 드랍합니다. 획득처에 보스 노드가 표시됩니다.</li>
     <li>자원 드랍량 증가: 자원 부스터, 자원 드랍 확률 부스터, 네크로스의 데시크레이트, 스미타 카밧의 Charm 등을 활용하세요.</li>
+  </ul>
+  <h2>채광 · 낚시 · 채집</h2>
+  <ul>
+    <li>검색창에 <b>채광</b>, <b>낚시</b>, <b>물고기 분해</b>, <b>채집</b>, <b>정제</b>, <b>동물 보호</b>를 입력하면 해당 방식으로 얻는 자원만 모아 볼 수 있습니다.</li>
+    <li>광석·보석 상세 화면에는 광맥 색과 지역, 필요한 채굴 도구가, 물고기에는 지역·시간대(날씨)·추천 작살·미끼·분해 부위가 표시됩니다.</li>
+    <li>얼로이·가공 보석은 원석을 모아 설계도로 <b>정제</b>합니다. 설계도 판매처는 상세 화면 설명에 나옵니다.</li>
   </ul>
   <h2>명칭과 데이터</h2>
   <ul>
