@@ -250,10 +250,12 @@ const KIND = {
   farm: { label: '파밍 자원', hint: '미션·오픈월드에서 모으기' },
   drop: { label: '파밍 부품', hint: '드랍으로 얻기' },
   buy: { label: '구매·연구', hint: '시장·상점·클랜 도장에서 얻기' },
+  unknown: { label: '획득처 정보 없음', hint: '공식 데이터에 획득처가 없음' },
 };
 
 // 드랍이 아닌 획득처: ["d", 복제 크레딧] 클랜 도장 연구, ["s", 신디케이트, 등급, 평판, 크레딧] 상점
 function srcText(x) {
+  if (x[0] === 'm') return `시장${x[1] ? ` · ${fmt(x[1])} 크레딧` : ''}${x[2] ? ` · ${fmt(x[2])} 플래티넘` : ''}`;
   if (x[0] === 'd') return `클랜 도장 연구${x[1] ? ` · 연구 후 설계도 ${fmt(x[1])} 크레딧` : ''}`;
   if (x[0] === 's') return `${esc(x[1])} 상점${x[2] ? ` · ${esc(x[2])} 등급` : ''}${x[3] ? ` · 평판 ${fmt(x[3])}` : ''}${x[4] ? ` · ${fmt(x[4])} 크레딧` : ''}`;
   return '';
@@ -273,11 +275,20 @@ function rowKind(row) {
   }
   if (row.b) return 'craft';
   if (row.dr || row.d1) return 'drop';
-  return 'buy';
+  return row.src || row.how ? 'buy' : 'unknown';
 }
 
 function chips(list) {
   return list.filter(Boolean).map((c) => `<span class="chip">${c}</span>`).join('');
+}
+
+function unknownText(en) {
+  return `공식 데이터에 획득처 없음 · <a href="${esc(fandom(String(en || '').replace(/ Blueprint$/, '')))}" target="_blank" rel="noopener">위키에서 확인</a>`;
+}
+// 설계도로 만드는 자원이라도 그 설계도를 얻을 곳이 알려져 있어야 "직접 제작"을 고를 수 있다
+function bpKnown(b) {
+  const bp = b.l.find((x) => x.id == null && /Blueprint$/.test(x.e || ''));
+  return !bp || !!(bp.dr || bp.d1 || bp.src || bp.how);
 }
 
 function placeLink(d) {
@@ -301,8 +312,9 @@ function treeNode(row) {
   if (kind === 'drop') meta.push(`추천: ${bestDrop(row.dr || [row.d1])}`);
   if (kind === 'buy') {
     if (row.src) row.src.slice(0, 2).forEach((x) => meta.push(srcText(x)));
-    else meta.push(row.how ? esc(row.how) : '드랍 정보 없음 (시장·퀘스트·상인)');
+    if (row.how && !(row.src && /설계도를 구매/.test(row.how) && row.src.some((x) => x[0] === 's'))) meta.push(esc(row.how));
   }
+  if (kind === 'unknown') meta.push(unknownText(row.e));
   if (row.du) meta.push(`두캇 ${row.du}`);
   let extra = '';
   if (row.dr) extra += `<details class="node-drops"><summary>획득처 ${row.dr.length}곳 보기</summary>${dropsTable(row.dr, { limit: 8 })}</details>`;
@@ -531,7 +543,7 @@ async function expandBuild(info, b, mult, acc, depth = 0) {
     const need = isBp && b.k ? row.q : row.q * times;
     if (row.id != null) {
       const sub = depth < 8 ? await getRecord(row.id) : null;
-      const canCraft = sub && sub.b && (EXPAND_CATS.has(sub.c) || sub.c === 'resources' || sub.c === 'misc');
+      const canCraft = sub && sub.b && (EXPAND_CATS.has(sub.c) || ((sub.c === 'resources' || sub.c === 'misc') && bpKnown(sub.b)));
       const pref = acc.prefs[row.id];
       const doCraft = canCraft && (pref !== undefined ? pref : (EXPAND_CATS.has(sub.c) || !!sub.mk));
       if (canCraft && !EXPAND_CATS.has(sub.c)) acc.craftable.add(row.id);
@@ -546,7 +558,7 @@ async function expandBuild(info, b, mult, acc, depth = 0) {
       }
     } else {
       const key = 'p' + row.e;
-      const kind = row.b ? 'craft' : (row.dr || row.d1) ? 'drop' : 'buy';
+      const kind = row.b ? 'craft' : (row.dr || row.d1) ? 'drop' : (row.src || row.how) ? 'buy' : 'unknown';
       const ex = acc.parts.get(row.e);
       if (ex) ex.q += need; else acc.parts.set(row.e, { ...row, q: need, kind });
       if (row.b) {
@@ -570,7 +582,8 @@ function planNode(n, have) {
   const meta = [];
   if (n.b) meta.push(`${fmt(n.b.cr * n.times)} 크레딧`, duration(n.b.tm));
   if (n.kind === 'drop' && n.part) meta.push(`추천: ${bestDrop(n.part.dr)}`);
-  if (n.kind === 'buy') meta.push(n.part && n.part.src ? srcText(n.part.src[0]) : n.part && n.part.how ? esc(n.part.how) : '시장·퀘스트·상인');
+  if (n.kind === 'buy') meta.push(n.part && n.part.src ? srcText(n.part.src[0]) : esc(n.part && n.part.how || ''));
+  if (n.kind === 'unknown') meta.push(unknownText(n.part && n.part.e));
   if (n.kind === 'refine' || (n.kind === 'farm' && n.id != null && state.craftable.has(n.id))) {
     meta.push(`<button class="link-btn" data-craft-toggle="${n.id}" data-to="${n.kind === 'refine' ? 0 : 1}">${n.kind === 'refine' ? '파밍으로 계산' : '직접 제작으로 계산'}</button>`);
   }
@@ -693,7 +706,7 @@ async function renderPlan() {
     h += `<div class="card"><h2>파밍·구매할 부품과 설계도</h2><div class="farm-list">${farmParts.map((x) => {
       const done = have['p' + x.e];
       const best = x.dr ? x.dr.slice(0, 3).map((d) => `<div class="farm-src"><span>${placeLink(d)}${d[4] && d[4].vt ? ' <span class="tag vault">볼트됨</span>' : ''}</span><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span><span class="num">${pct(d[1])}</span></div>`).join('')
-        : `<div class="r-sub">${x.src ? x.src.slice(0, 2).map(srcText).join('<br>') : x.how ? esc(x.how) : '드랍 정보 없음 (시장·퀘스트·상인)'}</div>`;
+        : `<div class="r-sub">${x.src ? x.src.slice(0, 2).map(srcText).join('<br>') : x.how ? esc(x.how) : unknownText(x.e)}</div>`;
       return `<div class="farm-item k-${x.kind}${done ? ' done' : ''}" data-have-row><div class="farm-head"><input type="checkbox" class="have-box" data-have="p${esc(x.e)}" ${done ? 'checked' : ''} aria-label="보유">
         <i class="dot k-${x.kind}"></i>${img(x.img, 'side-img')}<b>${nameLink(x.n, x.e)}${x.b ? ' 설계도' : ''}</b><span class="qty">× ${fmt(x.q)}</span></div>${best}</div>`;
     }).join('')}</div></div>`;
@@ -707,7 +720,7 @@ async function renderPlan() {
   if (acc.direct.length) {
     h += `<div class="card"><h2>직접 획득해야 하는 항목</h2><div class="farm-list">
       ${acc.direct.map(({ rec, q }) => `<div class="farm-item k-drop"><div class="farm-head"><i class="dot k-drop"></i>${itemLink(rec.id, rec.n)}<span class="qty">× ${q}</span></div>
-        ${rec.dr ? rec.dr.slice(0, 3).map((d) => `<div class="farm-src"><span>${placeLink(d)}</span><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span><span class="num">${pct(d[1])}</span></div>`).join('') : '<div class="r-sub">드랍 정보 없음</div>'}</div>`).join('')}
+        ${rec.dr ? rec.dr.slice(0, 3).map((d) => `<div class="farm-src"><span>${placeLink(d)}</span><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span><span class="num">${pct(d[1])}</span></div>`).join('') : `<div class="r-sub">${unknownText(rec.e)}</div>`}</div>`).join('')}
       </div></div>`;
   }
   el.innerHTML = h;

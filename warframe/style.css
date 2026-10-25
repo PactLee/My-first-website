@@ -231,6 +231,8 @@ tr.have td { opacity: .45; text-decoration: line-through; }
 .dot.k-farm { background: var(--k-farm); }
 .dot.k-drop { background: var(--k-drop); }
 .dot.k-buy { background: var(--k-buy); }
+.dot.k-unknown { background: transparent; border: 2px dashed var(--k-buy); width: 10px; height: 10px; box-sizing: border-box; }
+.node.k-unknown { border-style: dashed; }
 
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 6px 0 10px; font-size: 13px; color: var(--muted); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }

@@ -704,8 +704,11 @@ for u in order:
 # 4-2) 드랍이 아닌 획득처: 신디케이트 상점, 클랜 도장 연구 (공식 Public Export)
 # ---------------------------------------------------------------------------
 bp_of = {}  # 결과물 → 설계도 uniqueName
+market_of = {}  # 설계도 → ["m", 크레딧, 플래티넘] (시장에서 파는 것만)
 for key, rcp in load_pep("ExportRecipes.json").items():
     bp_of.setdefault(rcp.get("resultType"), key)
+    if not rcp.get("excludeFromMarket") and (rcp.get("creditsCost") or rcp.get("platinumCost")):
+        market_of[key] = ["m", rcp.get("creditsCost") or 0, rcp.get("platinumCost") or 0]
 dojo_price = {k: v.get("replicatePrice") or 0 for k, v in load_pep("ExportDojoRecipes.json").get("research", {}).items()}
 syn_src = defaultdict(list)
 for syn in load_pep("ExportSyndicates.json").values():
@@ -718,37 +721,52 @@ for syn in load_pep("ExportSyndicates.json").values():
         syn_src[item].append(["s", sname, titles.get(fav.get("requiredLevel"), ""), fav.get("standingCost") or 0, fav.get("creditsCost") or 0])
 
 
-def sources(u):
+def key_sources(key):
     out = []
-    for key in (u, bp_of.get(u)):
-        if not key:
-            continue
+    if key:
+        if key in market_of:
+            out.append(market_of[key])
         if key in dojo_price:
             out.append(["d", dojo_price[key]])
         out.extend(syn_src.get(key, []))
+    return out
+
+
+def dedupe(items):
     uniq = []
-    for x in out:
+    for x in items:
         if x not in uniq:
             uniq.append(x)
     return uniq[:6]
 
 
-def add_sources(build):
+def sources(u):
+    return dedupe(key_sources(u) + key_sources(bp_of.get(u)))
+
+
+def add_sources(build, parent_u):
     for row in build["l"]:
         cu = row.pop("_u", None)
-        if cu and not row.get("dr"):
+        if row.get("dr"):
+            pass
+        elif str(row.get("e", "")).endswith("Blueprint") and parent_u:
+            # 설계도 줄: 상위 결과물을 만드는 공식 레시피(설계도)의 획득처
+            src = dedupe(key_sources(bp_of.get(parent_u)) + key_sources(cu))
+            if src:
+                row["src"] = src
+        elif cu:
             src = sources(cu)
             if src:
                 row["src"] = src
         if row.get("b"):
-            add_sources(row["b"])
+            add_sources(row["b"], cu)
 
 
 PLANETS_KO = set(planet_ko.values())
 for u in order:
     rec = records[index_of[u]]
     if rec.get("b"):
-        add_sources(rec["b"])
+        add_sources(rec["b"], u)
     src = sources(u)
     if src:
         rec["src"] = src
