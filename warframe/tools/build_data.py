@@ -778,20 +778,52 @@ for u in order:
         if pl:
             rec["pl"] = pl
 
-# 설계도로 만드는 자원: 정제 자원이나 획득 장소 설명이 없는 자원은 기본적으로 "제작"으로 계산
+# ---------------------------------------------------------------------------
+# 4-3) 검수: 시장 판매 여부, 설계도를 구할 수 있는지, 제작 기본값
+# ---------------------------------------------------------------------------
+EMBED_CATS = {"warframes", "primary", "secondary", "melee", "archwing", "companions"}
+recipes_by_result = defaultdict(list)
+for key, rcp in load_pep("ExportRecipes.json").items():
+    recipes_by_result[rcp.get("resultType")].append(rcp)
+
+
+def bp_row(build):
+    return next((r for r in build["l"] if "id" not in r and str(r.get("e", "")).endswith("Blueprint")), None)
+
+
+NOTE_KUVA = f"{pep_text.get('Kuva Lich Confrontation', '쿠바 리치').replace(' 결전', '')}를 처치하거나 개종시켜 얻는 무기입니다. 일반 제작으로는 얻을 수 없습니다."
+NOTE_TENET = "파보스의 자매들 관련 콘텐츠(자매 처치, 테넷 무기 상인)에서 얻는 테넷 무기입니다. 일반 제작으로는 얻을 수 없습니다."
+NOTE_NOBP = "설계도를 얻을 곳이 공식 데이터(시장·드랍·상점·도장)에 없습니다. 퀘스트 보상, 시작 장비, 이벤트, 바로 키'티어, 거래 등 다른 방법으로 얻는 경우가 많으니 위키를 확인하세요."
+
 for u in order:
     rec = records[index_of[u]]
-    if rec["c"] in ("resources", "misc") and rec.get("b"):
+    # WFCD 의 bpCost 는 시장에서 팔지 않는 설계도(클랜 도장 연구 가격 등)에도 들어 있다 → 공식 데이터 기준으로 거른다
+    rcps = recipes_by_result.get(u, [])
+    if rec.get("bp") and rcps and all(r.get("excludeFromMarket") for r in rcps):
+        del rec["bp"]
+    if not rec.get("b"):
+        continue
+    # 설계도 줄에 구매처 안내 붙이기
+    buy = next((x for x in sentences(rec.get("d", "")) if "설계도를 구매" in x), None)
+    if not buy and rec.get("bp"):
+        buy = f"시장에서 {rec['bp']:,} 크레딧에 구매"
+    bp = bp_row(rec["b"])
+    if bp and buy and not bp.get("dr"):
+        bp["how"] = buy
+    known = bp is None or bool(bp.get("dr") or bp.get("src") or bp.get("how"))
+    if not known:
+        rec["nb"] = 1  # 설계도 획득처 없음 → 일반 제작 대상이 아님
+        en = rec.get("e", "")
+        if rec["c"] in EMBED_CATS and en.startswith("Kuva "):
+            rec["note"] = NOTE_KUVA
+        elif rec["c"] in EMBED_CATS and en.startswith("Tenet "):
+            rec["note"] = NOTE_TENET
+        else:
+            rec["note"] = NOTE_NOBP
+    # 설계도로 만드는 자원: 설계도를 구할 수 있고, 정제 자원이거나 획득 장소 설명이 없으면 기본 "제작"
+    if rec["c"] in ("resources", "misc") and known:
         if rec.get("ga", {}).get("m") == "정제" or "획득 가능 장소" not in rec.get("d", ""):
             rec["mk"] = 1
-    # 설계도 줄에 구매처 안내 붙이기
-    if rec.get("b"):
-        buy = next((x for x in sentences(rec.get("d", "")) if "설계도를 구매" in x), None)
-        if not buy and rec.get("bp"):
-            buy = f"시장에서 {rec['bp']:,} 크레딧에 구매"
-        for row in rec["b"]["l"]:
-            if buy and "id" not in row and not row.get("dr") and str(row.get("e", "")).endswith("Blueprint"):
-                row["how"] = buy
 
 # 물고기 → 분해해서 나오는 부위
 for u in order:
@@ -801,7 +833,6 @@ for u in order:
 
 # 재료로 쓰이는 무기·워프레임(예: 아크브롱코 프라임의 브롱코 프라임)은 상세 화면에서
 # 바로 보이도록 그 제작법을 재료 줄에 넣어 둔다 (깊이 2단계까지)
-EMBED_CATS = {"warframes", "primary", "secondary", "melee", "archwing", "companions"}
 
 
 def slim(build):
@@ -825,7 +856,7 @@ def embed(build, depth):
         if depth <= 0:
             continue
         sub = records[rid]
-        if (sub["c"] in EMBED_CATS or sub.get("mk")) and sub.get("b"):
+        if (sub["c"] in EMBED_CATS or sub.get("mk")) and sub.get("b") and not sub.get("nb"):
             row["b"] = slim(json.loads(json.dumps(sub["b"])))
             embed(row["b"], depth - 1)
 
@@ -887,7 +918,11 @@ index = []
 by_cat = defaultdict(dict)
 for rec in records:
     entry = [rec["id"], rec["n"], rec["e"], rec["c"], rec.get("t", ""), rec.get("img", "")]
-    flags = (1 if rec.get("v") else 0) | (2 if rec.get("p") else 0)
+    # 게임 내부용 항목(세트 모드 내부값, 퓨전 번들, 도그태그 등)은 검색에서 숨긴다
+    internal = rec["n"] == rec["e"] and re.match(
+        r"^[A-Z][a-z0-9]+(setmod|fusionbundle\w*|dogtag|storeitem|blueprint|endo\w*|bundle\w*|upgrade|item|base|tile|pigment|fuser|exf)$",
+        rec["e"] or "")
+    flags = (1 if rec.get("v") else 0) | (2 if rec.get("p") else 0) | (4 if rec.get("nb") else 0) | (8 if internal else 0)
     entry.append(flags)
     al = sorted(set(a for a in aliases.get(rec["id"], []) if a and a not in (rec["n"], rec["e"])))
     entry.append(al)

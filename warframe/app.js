@@ -139,9 +139,9 @@ async function getRecord(id) {
 // ---------------------------------------------------------------- 검색
 function renderCats() {
   const counts = {};
-  for (const r of state.index.items) counts[r[3]] = (counts[r[3]] || 0) + 1;
+  for (const r of state.index.items) if (!(r[6] & 8)) counts[r[3]] = (counts[r[3]] || 0) + 1;
   const btn = (key, label) => `<button data-cat="${key}" class="${state.cat === key ? 'on' : ''}">${esc(label)}</button>`;
-  $('#cats').innerHTML = btn('all', `전체 ${fmt(state.index.items.length)}`) +
+  $('#cats').innerHTML = btn('all', `전체 ${fmt(state.index.items.filter((r) => !(r[6] & 8)).length)}`) +
     CAT_ORDER.filter((c) => counts[c]).map((c) => btn(c, `${state.index.cats[c]} ${fmt(counts[c])}`)).join('');
 }
 
@@ -150,6 +150,7 @@ function search() {
   const onlyPrime = $('#f-prime').checked, noVault = $('#f-avail').checked;
   const out = [];
   for (const row of state.index.items) {
+    if (row[6] & 8) continue; // 게임 내부용 항목
     if (state.cat !== 'all' && row[3] !== state.cat) continue;
     if (onlyPrime && !(row[6] & 2)) continue;
     if (noVault && (row[6] & 1)) continue;
@@ -271,7 +272,8 @@ function rowKind(row) {
       const r = state.byId.get(row.id);
       return r && (r[3] === 'resources' || r[3] === 'misc') ? 'refine' : 'craft';
     }
-    return 'farm';
+    const r = state.byId.get(row.id);
+    return r && (r[6] & 4) && EXPAND_CATS.has(r[3]) ? 'unknown' : 'farm';
   }
   if (row.b) return 'craft';
   if (row.dr || row.d1) return 'drop';
@@ -314,7 +316,7 @@ function treeNode(row) {
     if (row.src) row.src.slice(0, 2).forEach((x) => meta.push(srcText(x)));
     if (row.how && !(row.src && /설계도를 구매/.test(row.how) && row.src.some((x) => x[0] === 's'))) meta.push(esc(row.how));
   }
-  if (kind === 'unknown') meta.push(unknownText(row.e));
+  if (kind === 'unknown') meta.push(row.id != null ? '설계도 없음 · 직접 구해야 함' : unknownText(row.e));
   if (row.du) meta.push(`두캇 ${row.du}`);
   let extra = '';
   if (row.dr) extra += `<details class="node-drops"><summary>획득처 ${row.dr.length}곳 보기</summary>${dropsTable(row.dr, { limit: 8 })}</details>`;
@@ -378,7 +380,10 @@ async function renderDetail(id) {
   const how = [];
   if (rec.mp) how.push(`시장에서 <b>${fmt(rec.mp)} 플래티넘</b>으로 완제품 구매`);
   if (rec.bp) how.push(`시장에서 설계도를 <b>${fmt(rec.bp)} 크레딧</b>에 구매 후 제작`);
-  if (rec.b && !rec.bp && rec.b.l.some((x) => x.dr || x.src)) how.push('부품·설계도를 아래 획득처에서 파밍한 뒤 주조소에서 제작');
+  // 설계도를 구할 곳이 없는 아이템: 다른 획득 방법이 없을 때만 "일반 제작 불가"를 앞에 내세운다
+  const otherWay = rec.dr || rec.pl || rec.src || rec.mp || rec.ga;
+  if (rec.nb && !otherWay) how.unshift(`<b>일반 제작 불가</b>: ${esc(rec.note || '')}`);
+  if (rec.b && !rec.nb && !rec.bp && rec.b.l.some((x) => x.dr || x.src)) how.push('설계도·부품을 아래 제작 트리에 나온 방법(드랍·상점·클랜 도장)으로 구한 뒤 주조소에서 제작');
   if (rec.dr) how.push('아래 획득처에서 직접 드랍');
   if (rec.src) rec.src.forEach((x) => how.push(srcText(x)));
   if (rec.pl) how.push(`<b>행성</b>: ${rec.pl.map(esc).join(', ')} 미션에서 드랍 (게임 내 설명)`);
@@ -400,7 +405,10 @@ async function renderDetail(id) {
 
   if (ga) h += gatherBlock(ga, rec);
 
-  if (rec.b) {
+  if (rec.b && rec.nb) {
+    h += `<h2>제작 방법</h2><p>이 아이템은 설계도를 구할 곳이 확인되지 않아 제작 대상으로 보여주지 않습니다.${otherWay ? ' 위의 "얻는 방법"으로 구하세요.' : ''}</p>
+      <details class="nb-recipe"><summary>참고: 게임 데이터에 남아 있는 제작법 보기</summary>${craftTree(rec)}</details>`;
+  } else if (rec.b) {
     h += `<h2>제작 방법</h2><div class="craft-layout">
       <aside class="craft-side" id="craft-side"><p class="muted">필요 재료 합계를 계산하는 중…</p></aside>
       <div class="craft-tree">${craftTree(rec)}
@@ -426,7 +434,7 @@ async function renderDetail(id) {
     h += `<h2>사용처 (이 재료가 필요한 제작품 ${rec.u.length}개)</h2><p>${rec.u.map((i) => itemLink(i)).join(', ')}</p>`;
   }
   el.innerHTML = h;
-  if (rec.b) renderCraftSide(rec);
+  if (rec.b && !rec.nb) renderCraftSide(rec);
 }
 
 // ---------------------------------------------------------------- 장소별 보기
@@ -555,7 +563,14 @@ async function expandBuild(info, b, mult, acc, depth = 0) {
     const need = isBp && b.k ? row.q : row.q * times;
     if (row.id != null) {
       const sub = depth < 8 ? await getRecord(row.id) : null;
-      const canCraft = sub && sub.b && (EXPAND_CATS.has(sub.c) || ((sub.c === 'resources' || sub.c === 'misc') && bpKnown(sub.b)));
+      const canCraft = sub && sub.b && !sub.nb && (EXPAND_CATS.has(sub.c) || ((sub.c === 'resources' || sub.c === 'misc') && bpKnown(sub.b)));
+      if (sub && sub.nb && EXPAND_CATS.has(sub.c)) {
+        const key = 'p' + sub.e;
+        const ex = acc.parts.get(sub.e);
+        if (ex) ex.q += need; else acc.parts.set(sub.e, { n: sub.n, e: sub.e, id: sub.id, img: sub.img, q: need, kind: 'unknown', note: sub.note });
+        node.children.push({ name: sub.n, id: sub.id, kind: 'unknown', q: need, key, part: { e: sub.e, note: sub.note } });
+        continue;
+      }
       const pref = acc.prefs[row.id];
       const doCraft = canCraft && (pref !== undefined ? pref : (EXPAND_CATS.has(sub.c) || !!sub.mk));
       if (canCraft && !EXPAND_CATS.has(sub.c)) acc.craftable.add(row.id);
@@ -606,7 +621,7 @@ function planNode(n, have) {
   if (n.b && !n.ready) meta.push(`${fmt(n.b.cr * n.times)} 크레딧`, duration(n.b.tm));
   if (n.kind === 'drop' && n.part) meta.push(`추천: ${bestDrop(n.part.dr)}`);
   if (n.kind === 'buy') meta.push(n.part && n.part.src ? srcText(n.part.src[0]) : esc(n.part && n.part.how || ''));
-  if (n.kind === 'unknown') meta.push(unknownText(n.part && n.part.e));
+  if (n.kind === 'unknown') meta.push(n.part && n.part.note ? esc(n.part.note) : unknownText(n.part && n.part.e));
   if (n.kind === 'refine' || (n.kind === 'farm' && n.id != null && state.craftable.has(n.id))) {
     meta.push(`<button class="link-btn" data-craft-toggle="${n.id}" data-to="${n.kind === 'refine' ? 0 : 1}">${n.kind === 'refine' ? '파밍으로 계산' : '직접 제작으로 계산'}</button>`);
   }
@@ -666,7 +681,7 @@ async function renderPlan() {
   for (const x of p) {
     const rec = await getRecord(x.id);
     if (!rec) continue;
-    if (!rec.b) { acc.direct.push({ rec, q: x.q }); continue; }
+    if (!rec.b || rec.nb) { acc.direct.push({ rec, q: x.q }); continue; }
     const node = await expandBuild({ name: rec.n, id: rec.id, kind: 'final' }, rec.b, x.q, acc, 0);
     acc.time = Math.max(acc.time, node.time);
     trees.push([rec, x.q, node]);
@@ -779,7 +794,7 @@ async function renderPlan() {
       const got = have.get(key);
       const done = got >= x.q;
       const best = x.dr ? x.dr.slice(0, 3).map((d) => `<div class="farm-src"><span>${placeLink(d)}${d[4] && d[4].vt ? ' <span class="tag vault">볼트됨</span>' : ''}</span><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span><span class="num">${pct(d[1])}</span></div>`).join('')
-        : `<div class="r-sub">${x.src ? x.src.slice(0, 2).map(srcText).join('<br>') : x.how ? esc(x.how) : unknownText(x.e)}</div>`;
+        : `<div class="r-sub">${x.src ? x.src.slice(0, 2).map(srcText).join('<br>') : x.how ? esc(x.how) : x.note ? esc(x.note) : unknownText(x.e)}</div>`;
       return `<div class="farm-item k-${x.kind}${done ? ' done' : ''}" data-have-row><div class="farm-head">${fullBox(key, got, x.q)}
         <i class="dot k-${x.kind}"></i>${img(x.img, 'side-img')}<b>${nameLink(x.n, x.e)}${x.b ? ' 설계도' : ''}</b>${x.q > 1 ? ownedInput(key, got, x.q, 'small') : ''}</div>${best}</div>`;
     }).join('')}</div></div>`;
@@ -793,7 +808,8 @@ async function renderPlan() {
   if (acc.direct.length) {
     h += `<div class="card"><h2>직접 획득해야 하는 항목</h2><div class="farm-list">
       ${acc.direct.map(({ rec, q }) => `<div class="farm-item k-drop"><div class="farm-head"><i class="dot k-drop"></i>${itemLink(rec.id, rec.n)}<span class="qty">× ${q}</span></div>
-        ${rec.dr ? rec.dr.slice(0, 3).map((d) => `<div class="farm-src"><span>${placeLink(d)}</span><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span><span class="num">${pct(d[1])}</span></div>`).join('') : `<div class="r-sub">${unknownText(rec.e)}</div>`}</div>`).join('')}
+        ${rec.note ? `<div class="r-sub">${esc(rec.note)}</div>` : ''}
+        ${rec.dr ? rec.dr.slice(0, 3).map((d) => `<div class="farm-src"><span>${placeLink(d)}</span><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span><span class="num">${pct(d[1])}</span></div>`).join('') : rec.note ? '' : `<div class="r-sub">${unknownText(rec.e)}</div>`}</div>`).join('')}
       </div></div>`;
   }
   el.innerHTML = h;

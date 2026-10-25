@@ -410,3 +410,7 @@ span.node-img, span.res-img, span.side-img { display: none; }
 
 .inter { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-top: 6px; font-size: 13px; color: var(--muted); }
 .inter .owned { margin: 0; }
+
+.nb-recipe { margin-top: 8px; }
+.nb-recipe > summary { cursor: pointer; color: var(--muted); }
+.nb-recipe[open] > summary { margin-bottom: 10px; }
