@@ -530,13 +530,25 @@ function updatePlanBadge() {
 
 function craftPrefs() { return store('wf-craft', {}); }
 
+// 이미 만들어 둔 중간 결과물(부품·정제 자원·재료 무기)을 먼저 쓰고, 모자란 만큼만 만든다.
+// acc.pool 은 보유 수량에서 아직 쓰지 않은 개수. 같은 결과물이 여러 곳에 쓰이면 앞에서부터 나눠 쓴다.
+function takeStock(acc, key, need) {
+  acc.interNeed.set(key, (acc.interNeed.get(key) || 0) + need);
+  const left = acc.pool ? Math.max(0, Number(acc.pool[key]) || 0) : 0;
+  const use = Math.min(left, need);
+  if (acc.pool) acc.pool[key] = left - use;
+  return need - use;
+}
+
 // 제작 트리를 끝까지 펼쳐 크레딧·자원·파밍할 부품·제작 단계를 모은다.
 // 돌려주는 node.time 은 그 단계까지 걸리는 최소 시간(하위 제작은 동시에 진행한다고 가정).
 async function expandBuild(info, b, mult, acc, depth = 0) {
+  acc.interNeed = acc.interNeed || new Map();
   const times = Math.ceil(mult / (b.q || 1));
   acc.credits += b.cr * times;
-  const node = { ...info, q: mult, b, times, children: [], depth };
+  const node = { ...info, q: info.q ?? mult, make: mult, b, times, children: [], depth };
   let longest = 0;
+  const fulfilled = (base, need) => ({ ...base, q: need, make: 0, b: base.b, times: 0, children: [], depth: depth + 1, time: 0, ready: true });
   for (const row of b.l) {
     // 소모되지 않는 설계도는 제작 횟수와 상관없이 1장이면 된다
     const isBp = row.id == null && /Blueprint$/.test(row.e || '');
@@ -549,26 +561,35 @@ async function expandBuild(info, b, mult, acc, depth = 0) {
       if (canCraft && !EXPAND_CATS.has(sub.c)) acc.craftable.add(row.id);
       if (doCraft) {
         const kind = EXPAND_CATS.has(sub.c) ? 'craft' : 'refine';
-        const child = await expandBuild({ name: sub.n, id: sub.id, kind }, sub.b, need, acc, depth + 1);
+        const key = 'c' + sub.id;
+        const rest = takeStock(acc, key, need);
+        const base = { name: sub.n, id: sub.id, kind, key, b: sub.b };
+        if (!rest) { node.children.push(fulfilled(base, need)); continue; }
+        const child = await expandBuild({ ...base, q: need }, sub.b, rest, acc, depth + 1);
         node.children.push(child);
         longest = Math.max(longest, child.time);
       } else {
         acc.res.set(row.id, (acc.res.get(row.id) || 0) + need);
         node.children.push({ name: state.byId.get(row.id)?.[1], id: row.id, kind: 'farm', q: need, key: 'r' + row.id });
       }
+    } else if (row.b) {
+      // 부품(섀시 등): 완성된 부품이 있으면 그만큼 설계도·재료가 필요 없다
+      const key = 'b' + row.e;
+      const rest = takeStock(acc, key, need);
+      const base = { name: row.n, kind: 'craft', key, part: row, b: row.b };
+      if (!rest) { node.children.push(fulfilled(base, need)); continue; }
+      const ex = acc.parts.get(row.e);
+      if (ex) ex.q += rest; else acc.parts.set(row.e, { ...row, q: rest, kind: 'craft' });
+      const child = await expandBuild({ ...base, q: need }, row.b, rest, acc, depth + 1);
+      child.part = row;
+      node.children.push(child);
+      longest = Math.max(longest, child.time);
     } else {
       const key = 'p' + row.e;
-      const kind = row.b ? 'craft' : (row.dr || row.d1) ? 'drop' : (row.src || row.how) ? 'buy' : 'unknown';
+      const kind = (row.dr || row.d1) ? 'drop' : (row.src || row.how) ? 'buy' : 'unknown';
       const ex = acc.parts.get(row.e);
       if (ex) ex.q += need; else acc.parts.set(row.e, { ...row, q: need, kind });
-      if (row.b) {
-        const child = await expandBuild({ name: row.n, kind: 'craft', key }, row.b, need, acc, depth + 1);
-        child.part = row;
-        node.children.push(child);
-        longest = Math.max(longest, child.time);
-      } else {
-        node.children.push({ name: row.n, kind, q: need, key, part: row });
-      }
+      node.children.push({ name: row.n, kind, q: need, key, part: row });
     }
   }
   acc.steps.push({ n: info.name, times: times * (b.q || 1), cr: b.cr * times, tm: b.tm, depth });
@@ -582,7 +603,7 @@ function planNode(n, have) {
   const done = n.key && !n.b && total && got >= total;
   const name = n.id != null ? itemLink(n.id, n.name) : `<b>${nameLink(n.name, n.part && n.part.e)}</b>`;
   const meta = [];
-  if (n.b) meta.push(`${fmt(n.b.cr * n.times)} 크레딧`, duration(n.b.tm));
+  if (n.b && !n.ready) meta.push(`${fmt(n.b.cr * n.times)} 크레딧`, duration(n.b.tm));
   if (n.kind === 'drop' && n.part) meta.push(`추천: ${bestDrop(n.part.dr)}`);
   if (n.kind === 'buy') meta.push(n.part && n.part.src ? srcText(n.part.src[0]) : esc(n.part && n.part.how || ''));
   if (n.kind === 'unknown') meta.push(unknownText(n.part && n.part.e));
@@ -591,10 +612,20 @@ function planNode(n, have) {
   }
   const icon = img(n.id != null ? state.byId.get(n.id)?.[5] : n.part && n.part.img, 'node-img');
   if (n.key && !n.b && total) meta.unshift(`<b class="${done ? 'ok-text' : ''}">보유 ${fmt(Math.min(got, total))} / ${fmt(total)}</b>`);
-  const box = n.key && !n.b ? fullBox(n.key, got, total) : '';
+  let box = n.key && !n.b ? fullBox(n.key, got, total) : '';
+  let inter = '';
+  if (n.key && n.b) {
+    // 중간 결과물: 완성품을 몇 개 가지고 있는지 입력하면 아래 재료가 그만큼 줄어든다
+    const tot = have.need(n.key);
+    const own = have.get(n.key);
+    box = fullBox(n.key, own, tot);
+    inter = `<div class="inter">완성품 보유 ${ownedInput(n.key, own, tot, 'small')}
+      <span class="r-sub">${n.ready ? '이미 준비됨 · 재료 필요 없음' : n.make < n.q ? `${fmt(n.q - n.make)}개는 보유분 사용 · ${fmt(n.make)}개 제작` : `${fmt(n.make)}개 제작`}</span></div>`;
+  }
   const kids = n.children && n.children.length ? `<ul>${n.children.map((c) => planNode(c, have)).join('')}</ul>` : '';
-  return `<li><div class="node k-${n.kind}${done ? ' done' : ''}" data-have-row>${box}<i class="dot k-${n.kind}"></i>${icon}<div class="node-main">
-    <div class="node-title">${name}<span class="qty">× ${fmt(n.q)}</span></div><div class="node-meta">${chips(meta)}</div></div></div>${kids}</li>`;
+  const ready = done || n.ready;
+  return `<li><div class="node k-${n.kind}${ready ? ' done' : ''}" data-have-row>${box}<i class="dot k-${n.kind}"></i>${icon}<div class="node-main">
+    <div class="node-title">${name}<span class="qty">× ${fmt(n.q)}</span></div><div class="node-meta">${chips(meta)}</div>${inter}</div></div>${kids}</li>`;
 }
 
 // 보유 수량: wf-owned = { 키: 개수 }. 예전 버전의 체크(wf-have)는 "다 모음"으로 취급한다
@@ -630,7 +661,7 @@ async function renderPlan() {
     return;
   }
   el.innerHTML = '<p class="muted">계산 중…</p>';
-  const acc = { credits: 0, time: 0, res: new Map(), parts: new Map(), direct: [], steps: [], craftable: new Set(), prefs: craftPrefs() };
+  const acc = { credits: 0, time: 0, res: new Map(), parts: new Map(), direct: [], steps: [], craftable: new Set(), prefs: craftPrefs(), pool: { ...ownedStore() }, interNeed: new Map() };
   const trees = [];
   for (const x of p) {
     const rec = await getRecord(x.id);
@@ -643,11 +674,12 @@ async function renderPlan() {
   state.craftable = acc.craftable;
   const resRows = [...acc.res.entries()].map(([id, q]) => [state.byId.get(id), q]).filter((x) => x[0])
     .sort((a, b) => nameCompare(a[0][1], b[0][1]));
-  const farmParts = [...acc.parts.values()];
+  const farmParts = [...acc.parts.values()].filter((x) => x.q > 0);
   const ownedMap = ownedStore(), legacy = store('wf-have', {});
   const needMap = new Map();
   for (const [r, q] of resRows) needMap.set('r' + r[0], q);
   for (const x of farmParts) needMap.set('p' + x.e, x.q);
+  for (const [k, q] of acc.interNeed) needMap.set(k, q);
   const have = {
     need: (k) => needMap.get(k) || 0,
     get: (k) => ownedOf(k, needMap.get(k) || 0, ownedMap, legacy),
@@ -712,6 +744,7 @@ async function renderPlan() {
     const maxDepth = Math.max(...acc.steps.map((x) => x.depth));
     const stages = [];
     for (const st of acc.steps) {
+      if (!st.times) continue;
       const i = maxDepth - st.depth;
       (stages[i] = stages[i] || []).push(st);
     }
@@ -736,7 +769,7 @@ async function renderPlan() {
         ${ownedInput(key, got, q)}
         ${miniBar(got, q)}<div class="r-sub">${done ? '다 모음' : `${fmt(q - got)}개 남음`}</div>
         ${canCraft ? `<div><button class="link-btn" data-craft-toggle="${r[0]}" data-to="1">직접 제작으로 계산</button></div>` : ''}</div></div>`;
-    }).join('')}</div><p class="muted">모은 개수를 입력하면 남은 개수와 진행률이 바뀝니다. 체크박스는 "다 모음"입니다. 자원 이름을 누르면 파밍 위치를 볼 수 있습니다.</p></div>`;
+    }).join('')}</div><p class="muted">모은 개수를 입력하면 남은 개수와 진행률이 바뀝니다. 체크박스는 "다 모음"입니다. 이미 만들어 둔 부품·정제 자원·재료 무기는 아래 <b>전체 제작 트리</b>의 "완성품 보유"에 입력하면 그만큼 필요한 재료가 함께 줄어듭니다.</p></div>`;
   }
 
   // 파밍할 부품
@@ -846,6 +879,7 @@ function renderGuide() {
   </ul>
   <h2>제작 계획 활용</h2>
   <ul>
+    <li><b>보유 수량</b>: 자원은 "모아야 할 자원"에, 이미 만든 부품(섀시 등)·정제 자원·재료 무기는 "전체 제작 트리"의 "완성품 보유"에 입력하세요. 완성품이 있으면 그 아래 설계도와 재료 필요량이 자동으로 줄어듭니다.</li>
     <li><b>지금 갈 곳</b>: 아직 체크하지 않은 재료를 한 장소에서 가장 많이 얻을 수 있는 곳부터 보여줍니다. 행성 단위 자원은 "행성 미션 어디서나"로 표시됩니다.</li>
     <li>드랍되지 않는 설계도는 <b>신디케이트 상점</b>(필요 등급·평판)이나 <b>클랜 도장 연구</b>(연구 후 복제 크레딧)로 표시됩니다.</li>
   </ul>

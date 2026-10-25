@@ -407,3 +407,6 @@ span.node-img, span.res-img, span.side-img { display: none; }
 .res-tile.done, .farm-item.done, .node.done { opacity: .55; }
 .owned { white-space: nowrap; }
 .owned-input { width: 72px; }
+
+.inter { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-top: 6px; font-size: 13px; color: var(--muted); }
+.inter .owned { margin: 0; }
