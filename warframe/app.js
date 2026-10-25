@@ -12,6 +12,8 @@ const state = {
   index: null,      // {img, cats, items: [[id, n, e, cat, type, img, flags, aliases]]}
   byId: new Map(),  // id → index row
   relicIds: new Map(),  // 'Axi V8 Relic' → id
+  nameIdx: new Map(),   // 정규화한 이름 → id
+  aliasIdx: new Map(),  // 부품 이름 등 → 상위 아이템 id
   craftable: new Set(), // 제작 계획에서 직접 제작/파밍을 고를 수 있는 자원
   cats: {},         // cat → Promise<{id: record}>
   cat: 'all',
@@ -73,14 +75,47 @@ function itemLink(id, label) {
   return `<a href="#/item/${id}">${esc(label ?? (row ? row[1] : id))}</a>`;
 }
 
+// 이름(한국어·영어·부품 이름)으로 아이템을 찾는다. 같은 이름이 여러 개면 적이 아닌 쪽을 먼저.
+function findId(...names) {
+  for (const n of names) {
+    if (!n) continue;
+    const k = norm(n);
+    const id = state.nameIdx.get(k) ?? state.aliasIdx.get(k);
+    if (id != null) return id;
+  }
+  return null;
+}
+const placeOf = (text) => String(text).replace(/, 로테이션 [A-Z]$/, '');
+function locLink(label) {
+  return `<a href="#/loc/${encodeURIComponent(placeOf(label))}" title="이 장소에서 나오는 것 모두 보기">${esc(label)}</a>`;
+}
+// 어떤 이름이든 누를 수 있게: 아이템이면 상세로, 아니면 그 이름으로 검색
+function nameLink(label, en, id) {
+  const found = id ?? findId(label, en);
+  if (found != null) return itemLink(found, label);
+  return `<a href="#/search/${encodeURIComponent(label)}" title="이 이름으로 검색">${esc(label)}</a>`;
+}
+
 // ---------------------------------------------------------------- 데이터 로드
 async function loadIndex() {
   const res = await fetch(DATA + 'index.json');
   if (!res.ok) throw new Error('index.json ' + res.status);
   state.index = await res.json();
+  const rank = (row) => (row[3] === 'enemies' ? 1 : 0);
+  const put = (map, key, row) => {
+    const k = norm(key);
+    if (!k) return;
+    const prev = map.get(k);
+    if (prev == null || rank(state.byId.get(prev)) > rank(row)) map.set(k, row[0]);
+  };
   for (const row of state.index.items) {
     state.byId.set(row[0], row);
     if (row[3] === 'relics') state.relicIds.set(row[2], row[0]);
+  }
+  for (const row of state.index.items) {
+    put(state.nameIdx, row[1], row);
+    put(state.nameIdx, row[2], row);
+    for (const a of row[7]) put(state.aliasIdx, a, row);
   }
   const ix = state.index;
   $('#data-version').textContent = [ix.version && `WFCD v${ix.version}`, ix.pep && `Public Export v${ix.pep}`, ix.built && `기준일 ${ix.built}`].filter(Boolean).join(' · ');
@@ -152,7 +187,13 @@ function dropsTable(drops, opts = {}) {
   const rows = drops.map((d, i) => {
     const relic = d[4];
     const relicId = relic && state.relicIds.get(d[3]);
-    const name = relicId != null ? itemLink(relicId, d[0]) : esc(d[0]);
+    let name;
+    if (relicId != null) name = itemLink(relicId, d[0]);
+    else if (opts.items) name = nameLink(d[0], d[3]);
+    else {
+      const id = findId(d[0], d[3]);
+      name = id != null ? itemLink(id, d[0]) : locLink(d[0]);
+    }
     const vault = relic && relic.vt ? ' <span class="tag vault">볼트됨</span>' : '';
     const refine = relic ? `<div class="r-sub">${REFINES.map((r, j) => `${r} ${pct(relic.rc[j])}`).join(' · ')}</div>` : '';
     return `<tr${i >= limit ? ' hidden data-more' : ''} data-s="${esc(norm(d[0] + (d[3] || '')))}">
@@ -161,7 +202,7 @@ function dropsTable(drops, opts = {}) {
   }).join('');
   const more = drops.length > limit ? `<button class="btn small" data-more-btn="${uid}">전체 ${drops.length}곳 보기</button>` : '';
   const filter = drops.length > 8 ? `<input class="filter" data-filter="${uid}" placeholder="위치 필터 (예: 생존, 지구, Axi)">` : '';
-  return `${filter}<table id="${uid}"><thead><tr><th>획득 위치</th><th class="num">확률</th><th>희귀도</th></tr></thead><tbody>${rows}</tbody></table>${drops.some((d) => d[4]) ? '<div class="r-sub">성유물 확률은 Intact(미정제) 기준입니다.</div>' : ''}${more}`;
+  return `${filter}<table id="${uid}"><thead><tr><th>${opts.items ? '아이템' : '획득 위치'}</th><th class="num">확률</th><th>희귀도</th></tr></thead><tbody>${rows}</tbody></table>${drops.some((d) => d[4]) ? '<div class="r-sub">성유물 확률은 Intact(미정제) 기준입니다.</div>' : ''}${more}`;
 }
 
 function statsBlock(st, cat) {
@@ -239,15 +280,21 @@ function chips(list) {
   return list.filter(Boolean).map((c) => `<span class="chip">${c}</span>`).join('');
 }
 
+function placeLink(d) {
+  const relicId = d[4] && state.relicIds.get(d[3]);
+  if (relicId != null) return itemLink(relicId, d[0]);
+  const id = findId(d[0], d[3]);
+  return id != null ? itemLink(id, d[0]) : locLink(d[0]);
+}
 function bestDrop(dr) {
   if (!dr || !dr.length) return '';
   const d = dr[0];
-  return d[4] && d[4].vt ? '모두 볼트됨' : `${esc(d[0])} ${pct(d[1])}`;
+  return d[4] && d[4].vt ? '모두 볼트됨' : `${placeLink(d)} ${pct(d[1])}`;
 }
 
 function treeNode(row) {
   const kind = rowKind(row);
-  const name = row.id != null ? itemLink(row.id) : `<b>${esc(row.n)}</b>`;
+  const name = row.id != null ? itemLink(row.id) : `<b>${nameLink(row.n, row.e)}</b>`;
   const icon = img(row.id != null ? state.byId.get(row.id)?.[5] : row.img, 'node-img');
   const meta = [];
   if (row.b) meta.push(`${fmt(row.b.cr)} 크레딧`, duration(row.b.tm), row.b.q > 1 ? `${row.b.q}개 생산` : '');
@@ -357,7 +404,7 @@ async function renderDetail(id) {
   if (rec.c === 'enemies') {
     h += '<h2>이 적이 떨어뜨리는 아이템</h2>';
     h += rec.ed && rec.ed.length
-      ? dropsTable(rec.ed.map((d) => [d[0], d[1], d[2], d[3] && d[3] !== 'Mod Locations' ? d[3] : 0]))
+      ? dropsTable(rec.ed.map((d) => [d[0], d[1], d[2], d[3] && d[3] !== 'Mod Locations' ? d[3] : 0]), { items: true })
       : '<p class="muted">드랍 정보가 없습니다.</p>';
   } else if (rec.dr || (rec.c !== 'relics' && !rec.ga && !rec.b)) {
     h += `<h2>획득처 (드랍 위치)</h2>${dropsTable(rec.dr)}`;
@@ -368,6 +415,43 @@ async function renderDetail(id) {
   }
   el.innerHTML = h;
   if (rec.b) renderCraftSide(rec);
+}
+
+// ---------------------------------------------------------------- 장소별 보기
+// 미션·의뢰 등 한 장소에서 나오는 모든 아이템과 부품을 로테이션별로 모은다
+async function renderLoc(place) {
+  const el = $('#detail');
+  state.selected = 'loc:' + place;
+  el.innerHTML = `<h1>${esc(place)}</h1><p class="muted">이 장소에서 나오는 아이템을 모으는 중… (처음 한 번은 전체 데이터를 불러와 조금 걸립니다)</p>`;
+  const cats = await Promise.all(CAT_ORDER.map((c) => loadCat(c).catch(() => ({}))));
+  if (state.selected !== 'loc:' + place) return;
+  const hits = [];
+  const scan = (dr, label, id, en) => {
+    for (const d of dr || []) {
+      if (placeOf(d[0]) !== place) continue;
+      const m = d[0].match(/, 로테이션 ([A-Z])$/);
+      hits.push({ label, id, en, rot: m ? m[1] : '', c: d[1], r: d[2] });
+    }
+  };
+  for (const recs of cats) {
+    for (const rec of Object.values(recs)) {
+      scan(rec.dr, rec.n, rec.id);
+      for (const row of rec.b ? rec.b.l : []) if (row.id == null && row.dr) scan(row.dr, row.n, rec.id);
+    }
+  }
+  if (!hits.length) { el.innerHTML = `<h1>${esc(place)}</h1><p class="muted">이 장소에서 나오는 아이템을 찾지 못했습니다.</p>`; return; }
+  const groups = new Map();
+  for (const x of hits.sort((a, b) => b.c - a.c)) {
+    const k = x.rot ? `로테이션 ${x.rot}` : '보상';
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(x);
+  }
+  const keys = [...groups.keys()].sort();
+  el.innerHTML = `<div class="d-head"><div><h1>${esc(place)}</h1><div class="d-en">이 장소에서 나오는 아이템 ${hits.length}개</div></div></div>
+    ${keys.map((k) => `<h2>${esc(k)}</h2><table><thead><tr><th>아이템</th><th class="num">확률</th><th>희귀도</th></tr></thead><tbody>
+      ${groups.get(k).map((x) => `<tr><td>${itemLink(x.id, x.label)}</td><td class="num"><span class="bar"><i style="width:${Math.max(2, Math.min(100, x.c))}%"></i></span>${pct(x.c)}</td><td class="rar-${esc(x.r)}">${esc(x.r)}</td></tr>`).join('')}
+      </tbody></table>`).join('')}
+    <p class="muted">로테이션 A·B·C는 무한 미션의 보상 주기입니다 (A, A, B, C 순서로 반복).</p>`;
 }
 
 // 상세 화면 옆 요약: 이 아이템 1개를 끝까지 만드는 데 드는 총량
@@ -482,7 +566,7 @@ async function expandBuild(info, b, mult, acc, depth = 0) {
 
 function planNode(n, have) {
   const done = n.key && have[n.key];
-  const name = n.id != null ? itemLink(n.id, n.name) : `<b>${esc(n.name)}</b>`;
+  const name = n.id != null ? itemLink(n.id, n.name) : `<b>${nameLink(n.name, n.part && n.part.e)}</b>`;
   const meta = [];
   if (n.b) meta.push(`${fmt(n.b.cr * n.times)} 크레딧`, duration(n.b.tm));
   if (n.kind === 'drop' && n.part) meta.push(`추천: ${bestDrop(n.part.dr)}`);
@@ -546,9 +630,9 @@ async function renderPlan() {
 
   // 지금 갈 곳: 아직 없는 재료를 같은 장소에서 함께 얻을 수 있게 묶는다
   const spots = new Map();
-  const addSpot = (key, label, item, chance) => {
+  const addSpot = (key, label, item, chance, link) => {
     let sp = spots.get(key);
-    if (!sp) spots.set(key, sp = { label, items: new Map() });
+    if (!sp) spots.set(key, sp = { label, link, items: new Map() });
     const prev = sp.items.get(item);
     if (prev === undefined || (chance ?? 0) > (prev ?? 0)) sp.items.set(item, chance);
   };
@@ -556,7 +640,7 @@ async function renderPlan() {
     for (const d of (dr || []).slice(0, 12)) {
       if ((d[4] && d[4].vt) || /콘클레이브|Conclave/.test(d[0])) continue;
       const place = d[0].replace(/, 로테이션 [A-Z]$/, '');
-      addSpot('d' + place, place, name, d[1]);
+      addSpot('d' + place, place, name, d[1], d[4] ? placeLink(d) : null);
     }
   };
   for (const x of farmParts) if (!have['p' + x.e]) addDrops(x.n, x.dr);
@@ -572,8 +656,8 @@ async function renderPlan() {
     .sort((a, b) => b.items.size - a.items.size || Math.max(...b.items.values()) - Math.max(...a.items.values())).slice(0, 6);
   if (spotList.length) {
     h += `<div class="card"><h2>지금 갈 곳</h2><p class="muted">아직 체크하지 않은 재료를 한 번에 많이 얻을 수 있는 장소 순서입니다.</p><div class="farm-list">
-      ${spotList.map((sp) => `<div class="farm-item spot"><div class="farm-head"><b>${esc(sp.label)}</b><span class="chip">${sp.items.size}종</span></div>
-        ${[...sp.items.entries()].map(([n, c]) => `<div class="farm-src"><span>${esc(n)}</span>${c != null ? `<span class="bar"><i style="width:${Math.max(2, Math.min(100, c))}%"></i></span><span class="num">${pct(c)}</span>` : '<span></span><span></span>'}</div>`).join('')}
+      ${spotList.map((sp) => `<div class="farm-item spot"><div class="farm-head"><b>${sp.link || (sp.label.includes('행성 미션') ? esc(sp.label) : locLink(sp.label))}</b><span class="chip">${sp.items.size}종</span></div>
+        ${[...sp.items.entries()].map(([n, c]) => `<div class="farm-src"><span>${nameLink(n)}</span>${c != null ? `<span class="bar"><i style="width:${Math.max(2, Math.min(100, c))}%"></i></span><span class="num">${pct(c)}</span>` : '<span></span><span></span>'}</div>`).join('')}
       </div>`).join('')}</div></div>`;
   }
 
@@ -588,7 +672,7 @@ async function renderPlan() {
     h += `<div class="card"><h2>제작 순서</h2><div class="roadmap">${stages.map((list, i) => {
       const longest = Math.max(...list.map((x) => x.tm));
       return `<div class="stage"><div class="stage-head"><span class="stage-no">${i + 1}단계</span><span class="r-sub">최대 ${duration(longest)}</span></div>
-        ${list.map((x) => `<div class="step"><b>${esc(x.n)}</b>${x.times > 1 ? `<span class="qty">× ${fmt(x.times)}</span>` : ''}<div class="node-meta">${chips([`${fmt(x.cr)} 크레딧`, duration(x.tm)])}</div></div>`).join('')}
+        ${list.map((x) => `<div class="step"><b>${nameLink(x.n)}</b>${x.times > 1 ? `<span class="qty">× ${fmt(x.times)}</span>` : ''}<div class="node-meta">${chips([`${fmt(x.cr)} 크레딧`, duration(x.tm)])}</div></div>`).join('')}
       </div>`;
     }).join('<div class="stage-arrow" aria-hidden="true"></div>')}</div>
     <p class="muted">같은 단계에 있는 것은 주조소에서 동시에 만들 수 있습니다. 앞 단계가 끝나야 다음 단계를 시작할 수 있습니다.</p></div>`;
@@ -608,10 +692,10 @@ async function renderPlan() {
   if (farmParts.length) {
     h += `<div class="card"><h2>파밍·구매할 부품과 설계도</h2><div class="farm-list">${farmParts.map((x) => {
       const done = have['p' + x.e];
-      const best = x.dr ? x.dr.slice(0, 3).map((d) => `<div class="farm-src"><span>${esc(d[0])}${d[4] && d[4].vt ? ' <span class="tag vault">볼트됨</span>' : ''}</span><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span><span class="num">${pct(d[1])}</span></div>`).join('')
+      const best = x.dr ? x.dr.slice(0, 3).map((d) => `<div class="farm-src"><span>${placeLink(d)}${d[4] && d[4].vt ? ' <span class="tag vault">볼트됨</span>' : ''}</span><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span><span class="num">${pct(d[1])}</span></div>`).join('')
         : `<div class="r-sub">${x.src ? x.src.slice(0, 2).map(srcText).join('<br>') : x.how ? esc(x.how) : '드랍 정보 없음 (시장·퀘스트·상인)'}</div>`;
       return `<div class="farm-item k-${x.kind}${done ? ' done' : ''}" data-have-row><div class="farm-head"><input type="checkbox" class="have-box" data-have="p${esc(x.e)}" ${done ? 'checked' : ''} aria-label="보유">
-        <i class="dot k-${x.kind}"></i>${img(x.img, 'side-img')}<b>${esc(x.n)}${x.b ? ' 설계도' : ''}</b><span class="qty">× ${fmt(x.q)}</span></div>${best}</div>`;
+        <i class="dot k-${x.kind}"></i>${img(x.img, 'side-img')}<b>${nameLink(x.n, x.e)}${x.b ? ' 설계도' : ''}</b><span class="qty">× ${fmt(x.q)}</span></div>${best}</div>`;
     }).join('')}</div></div>`;
   }
 
@@ -623,7 +707,7 @@ async function renderPlan() {
   if (acc.direct.length) {
     h += `<div class="card"><h2>직접 획득해야 하는 항목</h2><div class="farm-list">
       ${acc.direct.map(({ rec, q }) => `<div class="farm-item k-drop"><div class="farm-head"><i class="dot k-drop"></i>${itemLink(rec.id, rec.n)}<span class="qty">× ${q}</span></div>
-        ${rec.dr ? rec.dr.slice(0, 3).map((d) => `<div class="farm-src"><span>${esc(d[0])}</span><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span><span class="num">${pct(d[1])}</span></div>`).join('') : '<div class="r-sub">드랍 정보 없음</div>'}</div>`).join('')}
+        ${rec.dr ? rec.dr.slice(0, 3).map((d) => `<div class="farm-src"><span>${placeLink(d)}</span><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span><span class="num">${pct(d[1])}</span></div>`).join('') : '<div class="r-sub">드랍 정보 없음</div>'}</div>`).join('')}
       </div></div>`;
   }
   el.innerHTML = h;
@@ -722,6 +806,23 @@ function route() {
   if (h === 'plan') { show('plan'); renderPlan(); return; }
   if (h === 'guide') { show('guide'); renderGuide(); return; }
   show('search');
+  const loc = h.match(/^loc\/(.+)$/);
+  if (loc) {
+    renderLoc(decodeURIComponent(loc[1]));
+    if (window.innerWidth <= 860) $('#detail').scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+  const sq = h.match(/^search\/(.+)$/);
+  if (sq) {
+    const q = decodeURIComponent(sq[1]);
+    $('#q').value = q;
+    state.q = q;
+    state.cat = 'all';
+    renderCats();
+    renderResults();
+    $('#detail').innerHTML = `<p class="muted">"${esc(q)}"(으)로 검색한 결과입니다. 왼쪽 목록에서 항목을 고르세요.</p>`;
+    return;
+  }
   const m = h.match(/^item\/(\d+)/);
   if (m) {
     renderDetail(Number(m[1]));
