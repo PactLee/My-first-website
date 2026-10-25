@@ -397,7 +397,10 @@ def recipe_build(result_unique, parent):
         else:
             row["n"] = row["e"] = iu.rsplit("/", 1)[-1]
         rows.append(row)
-    return {"cr": rcp.get("buildPrice") or 0, "tm": rcp.get("buildTime") or 0, "q": rcp.get("num") or 1, "l": rows}
+    out = {"cr": rcp.get("buildPrice") or 0, "tm": rcp.get("buildTime") or 0, "q": rcp.get("num") or 1, "l": rows}
+    if rcp.get("consumeOnUse") is False:
+        out["k"] = 1
+    return out
 
 for u in order:
     it = by_unique[u]
@@ -462,6 +465,8 @@ for u in order:
             "q": it.get("buildQuantity") or 1,
             "l": [],
         }
+        if it.get("consumeOnBuild") is False:
+            b["k"] = 1  # 설계도가 소모되지 않음 (자원 설계도 등)
         for c in comps:
             cu, cnt = c.get("uniqueName"), c.get("itemCount", 1)
             row = {"q": cnt}
@@ -633,6 +638,21 @@ for u in order:
     rec["ga"] = ga
     aliases[rec["id"]].append(ga["m"])
 
+# 설계도로 만드는 자원: 정제 자원이나 획득 장소 설명이 없는 자원은 기본적으로 "제작"으로 계산
+for u in order:
+    rec = records[index_of[u]]
+    if rec["c"] in ("resources", "misc") and rec.get("b"):
+        if rec.get("ga", {}).get("m") == "정제" or "획득 가능 장소" not in rec.get("d", ""):
+            rec["mk"] = 1
+    # 설계도 줄에 구매처 안내 붙이기
+    if rec.get("b"):
+        buy = next((x for x in sentences(rec.get("d", "")) if "설계도를 구매" in x), None)
+        if not buy and rec.get("bp"):
+            buy = f"시장에서 {rec['bp']:,} 크레딧에 구매"
+        for row in rec["b"]["l"]:
+            if buy and "id" not in row and not row.get("dr") and str(row.get("e", "")).endswith("Blueprint"):
+                row["how"] = buy
+
 # 물고기 → 분해해서 나오는 부위
 for u in order:
     rec = records[index_of[u]]
@@ -644,14 +664,29 @@ for u in order:
 EMBED_CATS = {"warframes", "primary", "secondary", "melee", "archwing", "companions"}
 
 
+def slim(build):
+    """펼쳐 넣는 사본은 용량을 줄이기 위해 전체 드랍표 대신 최고 확률 1곳만 남긴다."""
+    for row in build["l"]:
+        if row.get("dr"):
+            row["d1"] = row.pop("dr")[0]
+        row.pop("img", None)
+        if row.get("b"):
+            slim(row["b"])
+    return build
+
+
 def embed(build, depth):
     for row in build["l"]:
         rid = row.get("id")
-        if rid is None or depth <= 0:
+        if rid is None:
+            if row.get("b"):  # 부품 레시피 안의 재료도 펼친다
+                embed(row["b"], depth)
+            continue
+        if depth <= 0:
             continue
         sub = records[rid]
-        if sub["c"] in EMBED_CATS and sub.get("b"):
-            row["b"] = json.loads(json.dumps(sub["b"]))
+        if (sub["c"] in EMBED_CATS or sub.get("mk")) and sub.get("b"):
+            row["b"] = slim(json.loads(json.dumps(sub["b"])))
             embed(row["b"], depth - 1)
 
 

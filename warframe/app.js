@@ -12,6 +12,7 @@ const state = {
   index: null,      // {img, cats, items: [[id, n, e, cat, type, img, flags, aliases]]}
   byId: new Map(),  // id → index row
   relicIds: new Map(),  // 'Axi V8 Relic' → id
+  craftable: new Set(), // 제작 계획에서 직접 제작/파밍을 고를 수 있는 자원
   cats: {},         // cat → Promise<{id: record}>
   cat: 'all',
   q: '',
@@ -135,7 +136,7 @@ function dropsTable(drops, opts = {}) {
     const refine = relic ? `<div class="r-sub">${REFINES.map((r, j) => `${r} ${pct(relic.rc[j])}`).join(' · ')}</div>` : '';
     return `<tr${i >= limit ? ' hidden data-more' : ''} data-s="${esc(norm(d[0] + (d[3] || '')))}">
       <td>${name}${vault}${d[3] ? ` <span class="muted" title="영어 원문">· ${esc(d[3])}</span>` : ''}${refine}</td>
-      <td class="num">${pct(d[1])}</td><td class="rar-${esc(d[2])}">${esc(d[2])}</td></tr>`;
+      <td class="num"><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span>${pct(d[1])}</td><td class="rar-${esc(d[2])}">${esc(d[2])}</td></tr>`;
   }).join('');
   const more = drops.length > limit ? `<button class="btn small" data-more-btn="${uid}">전체 ${drops.length}곳 보기</button>` : '';
   const filter = drops.length > 8 ? `<input class="filter" data-filter="${uid}" placeholder="위치 필터 (예: 생존, 지구, Axi)">` : '';
@@ -179,30 +180,67 @@ function dropShort(d) {
   return `${esc(d[0])} <span class="muted">${pct(d[1])}</span>${vt}`;
 }
 
-// 하위 제작법(부품 레시피, 재료로 쓰이는 무기의 레시피)을 들여쓴 목록으로 보여준다
-function subBuild(b, depth = 0) {
-  if (!b) return '';
-  const items = b.l.map((x) => {
-    const name = x.id != null ? itemLink(x.id) : esc(x.n);
-    return `<li>${name} <span class="muted">× ${fmt(x.q)}</span>${x.b ? subBuild(x.b, depth + 1) : ''}</li>`;
-  }).join('');
-  return `<div class="sub-build"><div class="sub-head">제작: 크레딧 ${fmt(b.cr)} · ${duration(b.tm)}${b.q > 1 ? ` · ${b.q}개 생산` : ''}</div><ul>${items}</ul></div>`;
+// ---------------------------------------------------------------- 제작 트리 (상세 화면)
+// 재료 종류: 색과 라벨로 구분해 한눈에 무엇을 해야 하는지 보이게 한다
+const KIND = {
+  craft: { label: '제작', hint: '주조소에서 만들기' },
+  refine: { label: '정제·제작 자원', hint: '설계도로 만드는 자원' },
+  farm: { label: '파밍 자원', hint: '미션·오픈월드에서 모으기' },
+  drop: { label: '파밍 부품', hint: '드랍으로 얻기' },
+  buy: { label: '설계도 구매', hint: '시장·상인에게서 사기' },
+};
+
+function legend() {
+  return `<div class="legend">${Object.entries(KIND).map(([k, v]) => `<span><i class="dot k-${k}"></i>${v.label}</span>`).join('')}</div>`;
 }
 
-function componentBlock(row) {
+function rowKind(row) {
   if (row.id != null) {
-    const r = state.byId.get(row.id);
-    return `<div class="comp"><div class="comp-head">${img(r && r[5], 'thumb')}<div>${itemLink(row.id)}
-      ${r && r[1] !== r[2] ? `<div class="r-sub">${esc(r[2])}</div>` : ''}</div><span class="qty">× ${fmt(row.q)}</span></div>
-      ${row.b ? `<div class="r-sub">이 재료도 먼저 제작해야 합니다. 이름을 누르면 부품 획득처를 볼 수 있습니다.</div>${subBuild(row.b)}`
-        : '<div class="r-sub">클릭하면 이 재료의 획득처를 볼 수 있습니다.</div>'}</div>`;
+    if (row.b) {
+      const r = state.byId.get(row.id);
+      return r && (r[3] === 'resources' || r[3] === 'misc') ? 'refine' : 'craft';
+    }
+    return 'farm';
   }
-  const extra = [row.tr ? '거래 가능' : '', row.du ? `두캇 ${row.du}` : ''].filter(Boolean).join(' · ');
-  return `<div class="comp"><div class="comp-head">${img(row.img, 'thumb')}<div><b>${esc(row.n)}</b>
-      <div class="r-sub">${esc(row.e)}${extra ? ' · ' + esc(extra) : ''}</div></div><span class="qty">× ${fmt(row.q)}</span></div>
-      ${row.b ? `<div class="r-sub">설계도를 얻은 뒤 주조소에서 이 부품을 먼저 제작합니다.</div>${subBuild(row.b)}` : ''}
-      ${row.dr ? `<details${row.dr.length <= 6 ? ' open' : ''}><summary>획득처 ${row.dr.length}곳 (${row.dr[0][4] && row.dr[0][4].vt ? '모두 볼트됨' : `추천: ${esc(row.dr[0][0])} ${pct(row.dr[0][1])}`})</summary>${dropsTable(row.dr, { limit: 8 })}</details>`
-      : '<div class="r-sub">드랍 정보 없음 — 보통 시장(크레딧 구매), 퀘스트 보상 또는 상인/신디케이트에서 얻습니다. 위키를 참고하세요.</div>'}</div>`;
+  if (row.b) return 'craft';
+  if (row.dr || row.d1) return 'drop';
+  return 'buy';
+}
+
+function chips(list) {
+  return list.filter(Boolean).map((c) => `<span class="chip">${c}</span>`).join('');
+}
+
+function bestDrop(dr) {
+  if (!dr || !dr.length) return '';
+  const d = dr[0];
+  return d[4] && d[4].vt ? '모두 볼트됨' : `${esc(d[0])} ${pct(d[1])}`;
+}
+
+function treeNode(row) {
+  const kind = rowKind(row);
+  const name = row.id != null ? itemLink(row.id) : `<b>${esc(row.n)}</b>`;
+  const meta = [];
+  if (row.b) meta.push(`${fmt(row.b.cr)} 크레딧`, duration(row.b.tm), row.b.q > 1 ? `${row.b.q}개 생산` : '');
+  if (kind === 'drop') meta.push(`추천: ${bestDrop(row.dr || [row.d1])}`);
+  if (kind === 'buy') meta.push(row.how ? esc(row.how) : '드랍 정보 없음 (시장·퀘스트·상인)');
+  if (row.du) meta.push(`두캇 ${row.du}`);
+  let extra = '';
+  if (row.dr) extra += `<details class="node-drops"><summary>획득처 ${row.dr.length}곳 보기</summary>${dropsTable(row.dr, { limit: 8 })}</details>`;
+  if (row.b && row.id == null && !row.dr && !row.d1) {
+    const bp = row.b.l.find((x) => x.id == null && /Blueprint$/.test(x.e || ''));
+    if (!bp) extra += '<div class="r-sub">이 부품의 설계도 획득처는 위키를 참고하세요.</div>';
+  }
+  const children = row.b ? `<ul>${row.b.l.map(treeNode).join('')}</ul>` : '';
+  return `<li><div class="node k-${kind}"><i class="dot k-${kind}"></i><div class="node-main">
+      <div class="node-title">${name}<span class="qty">× ${fmt(row.q)}</span></div>
+      <div class="node-meta">${chips(meta)}</div>${extra}</div></div>${children}</li>`;
+}
+
+function craftTree(rec) {
+  const root = `<div class="node k-final"><i class="dot k-final"></i><div class="node-main"><div class="node-title"><b>${esc(rec.n)}</b>${rec.b.q > 1 ? `<span class="qty">× ${rec.b.q}</span>` : ''}</div>
+    <div class="node-meta">${chips([`${fmt(rec.b.cr)} 크레딧`, duration(rec.b.tm), rec.b.k ? '설계도 재사용' : ''])}</div></div></div>`;
+  return `${legend()}<ul class="tree"><li>${root}<ul>${rec.b.l.map(treeNode).join('')}</ul></li></ul>`;
 }
 
 async function renderDetail(id) {
@@ -265,15 +303,13 @@ async function renderDetail(id) {
     };
     how.unshift(`<b>${esc(ga.m)}</b>: ${esc(HOW[ga.m] || '')}`);
   }
-  if (how.length) h += `<h2>얻는 방법</h2><ul>${how.map((x) => `<li>${x}</li>`).join('')}</ul>`;
+  if (how.length) h += `<h2>얻는 방법</h2><div class="how">${how.map((x) => `<div class="how-item">${x}</div>`).join('')}</div>`;
 
   if (ga) h += gatherBlock(ga, rec);
 
   if (rec.b) {
-    h += `<h2>제작 방법 (주조소)</h2>
-      <p>크레딧 <b>${fmt(rec.b.cr)}</b> · 제작 시간 <b>${duration(rec.b.tm)}</b>${rec.b.q > 1 ? ` · 1회 제작 시 <b>${rec.b.q}개</b>` : ''}</p>
-      ${rec.b.l.map(componentBlock).join('')}
-      ${rec.b.l.some((x) => x.id == null && !x.b && !x.dr && !/Blueprint$/.test(x.e)) ? `<p class="muted">부품(섀시·시스템 등)을 만드는 데 필요한 세부 자원은 이 데이터에 포함되어 있지 않습니다. 위키 링크에서 확인하세요.</p>` : ''}`;
+    h += `<h2>제작 방법</h2>${craftTree(rec)}
+      <p class="muted">아래에서 위로 만들어 올라갑니다. 색이 있는 점은 재료 종류이고, 이름을 누르면 그 재료의 상세 정보로 이동합니다.</p>`;
   }
 
   if (rec.rw) {
@@ -287,7 +323,7 @@ async function renderDetail(id) {
     h += rec.ed && rec.ed.length
       ? dropsTable(rec.ed.map((d) => [d[0], d[1], d[2], d[3] && d[3] !== 'Mod Locations' ? d[3] : 0]))
       : '<p class="muted">드랍 정보가 없습니다.</p>';
-  } else if (rec.dr || (rec.c !== 'relics' && !rec.ga)) {
+  } else if (rec.dr || (rec.c !== 'relics' && !rec.ga && !rec.b)) {
     h += `<h2>획득처 (드랍 위치)</h2>${dropsTable(rec.dr)}`;
   }
 
@@ -337,38 +373,73 @@ function updatePlanBadge() {
   b.textContent = n;
 }
 
+function craftPrefs() { return store('wf-craft', {}); }
+
 // 제작 트리를 끝까지 펼쳐 크레딧·자원·파밍할 부품·제작 단계를 모은다.
-// 반환값은 이 단계까지 걸리는 최소 시간(하위 제작은 동시에 돌린다고 가정).
-async function expandBuild(name, b, mult, acc, depth = 0) {
+// 돌려주는 node.time 은 그 단계까지 걸리는 최소 시간(하위 제작은 동시에 진행한다고 가정).
+async function expandBuild(info, b, mult, acc, depth = 0) {
   const times = Math.ceil(mult / (b.q || 1));
   acc.credits += b.cr * times;
-  let longestChild = 0;
+  const node = { ...info, q: mult, b, times, children: [], depth };
+  let longest = 0;
   for (const row of b.l) {
-    const need = row.q * times;
+    // 소모되지 않는 설계도는 제작 횟수와 상관없이 1장이면 된다
+    const isBp = row.id == null && /Blueprint$/.test(row.e || '');
+    const need = isBp && b.k ? row.q : row.q * times;
     if (row.id != null) {
-      const sub = depth < 6 ? await getRecord(row.id) : null;
-      if (sub && EXPAND_CATS.has(sub.c) && sub.b) {
-        longestChild = Math.max(longestChild, await expandBuild(sub.n, sub.b, need, acc, depth + 1));
+      const sub = depth < 8 ? await getRecord(row.id) : null;
+      const canCraft = sub && sub.b && (EXPAND_CATS.has(sub.c) || sub.c === 'resources' || sub.c === 'misc');
+      const pref = acc.prefs[row.id];
+      const doCraft = canCraft && (pref !== undefined ? pref : (EXPAND_CATS.has(sub.c) || !!sub.mk));
+      if (canCraft && !EXPAND_CATS.has(sub.c)) acc.craftable.add(row.id);
+      if (doCraft) {
+        const kind = EXPAND_CATS.has(sub.c) ? 'craft' : 'refine';
+        const child = await expandBuild({ name: sub.n, id: sub.id, kind }, sub.b, need, acc, depth + 1);
+        node.children.push(child);
+        longest = Math.max(longest, child.time);
       } else {
         acc.res.set(row.id, (acc.res.get(row.id) || 0) + need);
+        node.children.push({ name: state.byId.get(row.id)?.[1], id: row.id, kind: 'farm', q: need, key: 'r' + row.id });
       }
     } else {
-      const key = row.e;
-      const ex = acc.parts.get(key);
-      if (ex) ex.q += need; else acc.parts.set(key, { ...row, q: need });
-      if (row.b) longestChild = Math.max(longestChild, await expandBuild(row.n, row.b, need, acc, depth + 1));
+      const key = 'p' + row.e;
+      const kind = row.b ? 'craft' : (row.dr || row.d1) ? 'drop' : 'buy';
+      const ex = acc.parts.get(row.e);
+      if (ex) ex.q += need; else acc.parts.set(row.e, { ...row, q: need, kind });
+      if (row.b) {
+        const child = await expandBuild({ name: row.n, kind: 'craft', key }, row.b, need, acc, depth + 1);
+        child.part = row;
+        node.children.push(child);
+        longest = Math.max(longest, child.time);
+      } else {
+        node.children.push({ name: row.n, kind, q: need, key, part: row });
+      }
     }
   }
-  acc.steps.push({ n: name, times: times * (b.q || 1), cr: b.cr * times, tm: b.tm, depth });
-  return b.tm + longestChild;
+  acc.steps.push({ n: info.name, times: times * (b.q || 1), cr: b.cr * times, tm: b.tm, depth });
+  node.time = b.tm + longest;
+  return node;
 }
 
-async function expand(rec, mult, acc) {
-  if (!rec.b) {
-    acc.direct.push({ rec, q: mult });
-    return;
+function planNode(n, have) {
+  const done = n.key && have[n.key];
+  const name = n.id != null ? itemLink(n.id, n.name) : `<b>${esc(n.name)}</b>`;
+  const meta = [];
+  if (n.b) meta.push(`${fmt(n.b.cr * n.times)} 크레딧`, duration(n.b.tm));
+  if (n.kind === 'drop' && n.part) meta.push(`추천: ${bestDrop(n.part.dr)}`);
+  if (n.kind === 'buy') meta.push(n.part && n.part.how ? esc(n.part.how) : '시장·퀘스트·상인');
+  if (n.kind === 'refine' || (n.kind === 'farm' && n.id != null && state.craftable.has(n.id))) {
+    meta.push(`<button class="link-btn" data-craft-toggle="${n.id}" data-to="${n.kind === 'refine' ? 0 : 1}">${n.kind === 'refine' ? '파밍으로 계산' : '직접 제작으로 계산'}</button>`);
   }
-  acc.time = Math.max(acc.time, await expandBuild(rec.n, rec.b, mult, acc, 0));
+  const box = n.key && !n.b ? `<input type="checkbox" class="have-box" data-have="${esc(n.key)}" ${done ? 'checked' : ''} aria-label="보유">` : '';
+  const kids = n.children && n.children.length ? `<ul>${n.children.map((c) => planNode(c, have)).join('')}</ul>` : '';
+  return `<li><div class="node k-${n.kind}${done ? ' done' : ''}" data-have-row>${box}<i class="dot k-${n.kind}"></i><div class="node-main">
+    <div class="node-title">${name}<span class="qty">× ${fmt(n.q)}</span></div><div class="node-meta">${chips(meta)}</div></div></div>${kids}</li>`;
+}
+
+function progress(done, total) {
+  const p = total ? Math.round((done / total) * 100) : 0;
+  return `<div class="progress"><i style="width:${p}%"></i></div><div class="r-sub">${done} / ${total} 완료</div>`;
 }
 
 async function renderPlan() {
@@ -376,54 +447,91 @@ async function renderPlan() {
   const p = plan();
   if (!p.length) {
     el.innerHTML = `<div class="card"><h2>제작 계획</h2><p>아직 추가된 항목이 없습니다. 검색에서 아이템을 선택하고 <b>제작 계획에 추가</b>를 누르면,
-      필요한 크레딧·자원·부품과 각 부품의 파밍 위치를 한눈에 모아 보여드립니다.</p><a class="btn" href="#/">검색으로 가기</a></div>`;
+      부품과 정제 자원까지 펼친 제작 트리, 단계별 제작 순서, 필요한 자원 합계를 보여드립니다.</p><a class="btn" href="#/">검색으로 가기</a></div>`;
     return;
   }
   el.innerHTML = '<p class="muted">계산 중…</p>';
-  const acc = { credits: 0, time: 0, res: new Map(), parts: new Map(), direct: [], steps: [] };
-  const recs = [];
+  const acc = { credits: 0, time: 0, res: new Map(), parts: new Map(), direct: [], steps: [], craftable: new Set(), prefs: craftPrefs() };
+  const trees = [];
   for (const x of p) {
     const rec = await getRecord(x.id);
     if (!rec) continue;
-    recs.push([rec, x.q]);
-    await expand(rec, x.q, acc);
+    if (!rec.b) { acc.direct.push({ rec, q: x.q }); continue; }
+    const node = await expandBuild({ name: rec.n, id: rec.id, kind: 'final' }, rec.b, x.q, acc, 0);
+    acc.time = Math.max(acc.time, node.time);
+    trees.push([rec, x.q, node]);
   }
+  state.craftable = acc.craftable;
   const have = store('wf-have', {});
   const resRows = [...acc.res.entries()].map(([id, q]) => [state.byId.get(id), q]).filter((x) => x[0])
     .sort((a, b) => a[0][1].localeCompare(b[0][1], 'ko'));
-  const chk = (key) => `<input type="checkbox" data-have="${esc(key)}" ${have[key] ? 'checked' : ''} title="보유함">`;
+  const farmParts = [...acc.parts.values()].filter((x) => !x.b);
+  const resDone = resRows.filter(([r]) => have['r' + r[0]]).length;
+  const partDone = farmParts.filter((x) => have['p' + x.e]).length;
 
-  let h = `<div class="plan-grid"><div class="card"><h2>목표 아이템</h2>
-    ${recs.map(([r, q]) => `<div class="plan-row">${img(r.img, 'thumb')}<span class="grow">${itemLink(r.id, r.n)}<span class="r-sub">${esc(r.e)}</span></span>
-      <input type="number" min="1" value="${q}" data-plan-q="${r.id}"><button class="btn small" data-plan-del="${r.id}">삭제</button></div>`).join('')}
-    <p>총 제작 크레딧 <b>${fmt(acc.credits)}</b> (부품·하위 무기 포함)${acc.time ? `<br>최소 소요 시간 <b>${duration(acc.time)}</b> <span class="muted">(부품을 동시에 제작할 때)</span>` : ''}</p>
-    <button class="btn small" data-plan-clear>계획 비우기</button></div>
-    <div class="card"><h2>필요 자원 합계</h2>
-    ${resRows.length ? `<table><thead><tr><th></th><th>자원</th><th class="num">수량</th></tr></thead><tbody>
-      ${resRows.map(([r, q]) => `<tr class="${have['r' + r[0]] ? 'have' : ''}"><td>${chk('r' + r[0])}</td><td>${itemLink(r[0])}</td><td class="num">${fmt(q)}</td></tr>`).join('')}
-      </tbody></table><p class="muted">자원을 클릭하면 파밍 위치를 볼 수 있습니다. 체크하면 보유 처리됩니다.</p>` : '<p class="muted">필요 자원 없음</p>'}
-    </div></div>`;
+  // 요약
+  let h = `<div class="summary">
+    <div class="tile"><span class="tile-label">총 크레딧</span><span class="tile-value">${fmt(acc.credits)}</span><span class="r-sub">부품·정제 포함</span></div>
+    <div class="tile"><span class="tile-label">최소 소요 시간</span><span class="tile-value">${acc.time ? duration(acc.time) : '-'}</span><span class="r-sub">동시 제작 기준</span></div>
+    <div class="tile"><span class="tile-label">모을 자원</span><span class="tile-value">${resRows.length}종</span>${progress(resDone, resRows.length)}</div>
+    <div class="tile"><span class="tile-label">파밍·구매할 부품</span><span class="tile-value">${farmParts.length}개</span>${progress(partDone, farmParts.length)}</div>
+  </div>`;
 
-  if (acc.parts.size) {
-    h += `<div class="card" style="margin-top:16px"><h2>파밍해야 할 부품·설계도</h2>
-      <table><thead><tr><th></th><th>부품</th><th class="num">수량</th><th>최고 확률 획득처</th></tr></thead><tbody>
-      ${[...acc.parts.values()].map((x) => `<tr class="${have['p' + x.e] ? 'have' : ''}"><td>${chk('p' + x.e)}</td><td>${esc(x.n)}${x.b ? ' <span class="tag">설계도 파밍 → 제작</span>' : ''}<div class="r-sub">${esc(x.e)}</div></td>
-        <td class="num">${fmt(x.q)}</td><td>${x.dr ? x.dr.slice(0, 3).map(dropShort).join('<br>') : '<span class="muted">드랍 정보 없음 (시장/퀘스트 등)</span>'}</td></tr>`).join('')}
-      </tbody></table></div>`;
-  }
+  // 목표 아이템
+  h += `<div class="card"><h2>목표 아이템</h2>${trees.map(([r, q]) => r).concat(acc.direct.map((d) => d.rec)).map((r) => {
+    const q = p.find((x) => x.id === r.id).q;
+    return `<div class="plan-row">${img(r.img, 'thumb')}<span class="grow">${itemLink(r.id, r.n)}<span class="r-sub">${esc(r.e)}</span></span>
+      <label class="r-sub" for="pq-${r.id}">개수</label><input id="pq-${r.id}" type="number" min="1" value="${q}" data-plan-q="${r.id}"><button class="btn small" data-plan-del="${r.id}">삭제</button></div>`;
+  }).join('')}<div class="btns"><button class="btn small" data-plan-clear>계획 비우기</button></div></div>`;
+
+  // 제작 순서 로드맵
   if (acc.steps.length) {
-    const steps = [...acc.steps].sort((a, b) => b.depth - a.depth);
-    h += `<div class="card" style="margin-top:16px"><h2>제작 순서 (주조소)</h2>
-      <table><thead><tr><th>단계</th><th>제작할 것</th><th class="num">개수</th><th class="num">크레딧</th><th class="num">시간</th></tr></thead><tbody>
-      ${steps.map((x) => `<tr><td>${Math.max(...steps.map((y) => y.depth)) - x.depth + 1}</td><td>${esc(x.n)}</td><td class="num">${fmt(x.times)}</td><td class="num">${fmt(x.cr)}</td><td class="num">${duration(x.tm)}</td></tr>`).join('')}
-      </tbody></table><p class="muted">같은 단계의 제작은 주조소에서 동시에 진행할 수 있습니다.</p></div>`;
+    const maxDepth = Math.max(...acc.steps.map((x) => x.depth));
+    const stages = [];
+    for (const st of acc.steps) {
+      const i = maxDepth - st.depth;
+      (stages[i] = stages[i] || []).push(st);
+    }
+    h += `<div class="card"><h2>제작 순서</h2><div class="roadmap">${stages.map((list, i) => {
+      const longest = Math.max(...list.map((x) => x.tm));
+      return `<div class="stage"><div class="stage-head"><span class="stage-no">${i + 1}단계</span><span class="r-sub">최대 ${duration(longest)}</span></div>
+        ${list.map((x) => `<div class="step"><b>${esc(x.n)}</b>${x.times > 1 ? `<span class="qty">× ${fmt(x.times)}</span>` : ''}<div class="node-meta">${chips([`${fmt(x.cr)} 크레딧`, duration(x.tm)])}</div></div>`).join('')}
+      </div>`;
+    }).join('<div class="stage-arrow" aria-hidden="true"></div>')}</div>
+    <p class="muted">같은 단계에 있는 것은 주조소에서 동시에 만들 수 있습니다. 앞 단계가 끝나야 다음 단계를 시작할 수 있습니다.</p></div>`;
   }
+
+  // 필요 자원
+  if (resRows.length) {
+    h += `<div class="card"><h2>모아야 할 자원</h2><div class="res-grid">${resRows.map(([r, q]) => {
+      const done = have['r' + r[0]];
+      const canCraft = acc.craftable.has(r[0]);
+      return `<div class="res-tile${done ? ' done' : ''}" data-have-row><input type="checkbox" class="have-box" data-have="r${r[0]}" ${done ? 'checked' : ''} aria-label="보유">
+        <div><div class="res-qty">${fmt(q)}</div>${itemLink(r[0])}${canCraft ? `<div><button class="link-btn" data-craft-toggle="${r[0]}" data-to="1">직접 제작으로 계산</button></div>` : ''}</div></div>`;
+    }).join('')}</div><p class="muted">체크하면 보유한 것으로 표시됩니다. 자원 이름을 누르면 파밍 위치를 볼 수 있습니다.</p></div>`;
+  }
+
+  // 파밍할 부품
+  if (farmParts.length) {
+    h += `<div class="card"><h2>파밍·구매할 부품과 설계도</h2><div class="farm-list">${farmParts.map((x) => {
+      const done = have['p' + x.e];
+      const best = x.dr ? x.dr.slice(0, 3).map((d) => `<div class="farm-src"><span>${esc(d[0])}${d[4] && d[4].vt ? ' <span class="tag vault">볼트됨</span>' : ''}</span><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span><span class="num">${pct(d[1])}</span></div>`).join('')
+        : `<div class="r-sub">${x.how ? esc(x.how) : '드랍 정보 없음 (시장·퀘스트·상인)'}</div>`;
+      return `<div class="farm-item k-${x.kind}${done ? ' done' : ''}" data-have-row><div class="farm-head"><input type="checkbox" class="have-box" data-have="p${esc(x.e)}" ${done ? 'checked' : ''} aria-label="보유">
+        <i class="dot k-${x.kind}"></i><b>${esc(x.n)}</b><span class="qty">× ${fmt(x.q)}</span></div>${best}</div>`;
+    }).join('')}</div></div>`;
+  }
+
+  // 전체 제작 트리
+  if (trees.length) {
+    h += `<div class="card"><h2>전체 제작 트리</h2>${legend()}${trees.map(([, , node]) => `<ul class="tree">${planNode(node, have)}</ul>`).join('')}</div>`;
+  }
+
   if (acc.direct.length) {
-    h += `<div class="card" style="margin-top:16px"><h2>직접 획득해야 하는 항목</h2>
-      <table><thead><tr><th>항목</th><th class="num">수량</th><th>최고 확률 획득처</th></tr></thead><tbody>
-      ${acc.direct.map(({ rec, q }) => `<tr><td>${itemLink(rec.id, rec.n)}</td><td class="num">${q}</td>
-        <td>${rec.dr ? rec.dr.slice(0, 3).map(dropShort).join('<br>') : '<span class="muted">드랍 정보 없음</span>'}</td></tr>`).join('')}
-      </tbody></table></div>`;
+    h += `<div class="card"><h2>직접 획득해야 하는 항목</h2><div class="farm-list">
+      ${acc.direct.map(({ rec, q }) => `<div class="farm-item k-drop"><div class="farm-head"><i class="dot k-drop"></i>${itemLink(rec.id, rec.n)}<span class="qty">× ${q}</span></div>
+        ${rec.dr ? rec.dr.slice(0, 3).map((d) => `<div class="farm-src"><span>${esc(d[0])}</span><span class="bar"><i style="width:${Math.max(2, Math.min(100, d[1]))}%"></i></span><span class="num">${pct(d[1])}</span></div>`).join('') : '<div class="r-sub">드랍 정보 없음</div>'}</div>`).join('')}
+      </div></div>`;
   }
   el.innerHTML = h;
 }
@@ -434,7 +542,7 @@ document.addEventListener('change', (e) => {
     const have = store('wf-have', {});
     if (t.checked) have[t.dataset.have] = 1; else delete have[t.dataset.have];
     save('wf-have', have);
-    t.closest('tr').classList.toggle('have', t.checked);
+    renderPlan();
   } else if (t.dataset.planQ !== undefined) {
     const p = plan();
     const x = p.find((y) => y.id === Number(t.dataset.planQ));
@@ -444,6 +552,14 @@ document.addEventListener('change', (e) => {
   }
 });
 document.addEventListener('click', (e) => {
+  const tog = e.target.closest('[data-craft-toggle]');
+  if (tog) {
+    const prefs = craftPrefs();
+    prefs[tog.dataset.craftToggle] = tog.dataset.to === '1';
+    save('wf-craft', prefs);
+    renderPlan();
+    return;
+  }
   const del = e.target.closest('[data-plan-del]');
   if (del) {
     save('wf-plan', plan().filter((x) => x.id !== Number(del.dataset.planDel)));

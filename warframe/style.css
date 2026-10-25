@@ -13,6 +13,13 @@
   --legendary: #c9a4ff;
   --vault: #e57373;
   --ok: #7bc47f;
+  /* 재료 종류 색 */
+  --k-final: #d8b46a;
+  --k-craft: #6fa8ff;
+  --k-refine: #b48cff;
+  --k-farm: #6cc48a;
+  --k-drop: #f09a5a;
+  --k-buy: #9aa4b2;
   color-scheme: dark;
 }
 
@@ -215,3 +222,125 @@ tr.have td { opacity: .45; text-decoration: line-through; }
   .results { position: static; max-height: 45vh; }
   .top { gap: 10px; flex-wrap: wrap; }
 }
+
+/* ---------- 재료 종류 표시 ---------- */
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--k-buy); }
+.dot.k-final { background: var(--k-final); }
+.dot.k-craft { background: var(--k-craft); }
+.dot.k-refine { background: var(--k-refine); }
+.dot.k-farm { background: var(--k-farm); }
+.dot.k-drop { background: var(--k-drop); }
+.dot.k-buy { background: var(--k-buy); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 6px 0 10px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+.chip {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--link);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* ---------- 제작 트리 ---------- */
+.tree, .tree ul { list-style: none; margin: 0; padding: 0; }
+.tree ul { padding-left: 22px; }
+.tree li { position: relative; padding: 4px 0; }
+.tree ul > li::before {
+  content: "";
+  position: absolute;
+  left: -13px;
+  top: 0;
+  bottom: 0;
+  border-left: 2px solid var(--line);
+}
+.tree ul > li:last-child::before { bottom: auto; height: 24px; }
+.tree ul > li::after {
+  content: "";
+  position: absolute;
+  left: -13px;
+  top: 24px;
+  width: 11px;
+  border-top: 2px solid var(--line);
+}
+.node {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-width: 0;
+}
+.node .dot { margin-top: 6px; }
+.node.k-final { border-color: var(--k-final); }
+.node-main { min-width: 0; flex: 1; }
+.node-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.node-title .qty, .step .qty, .farm-head .qty { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+.node-meta { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.node-meta:empty { display: none; }
+.node-drops { margin-top: 6px; }
+.node-drops summary { cursor: pointer; color: var(--link); font-size: 13px; }
+.node.done, .res-tile.done, .farm-item.done { opacity: .5; }
+.node.done .node-title b, .node.done .node-title a { text-decoration: line-through; }
+.have-box { margin-top: 3px; width: 18px; height: 18px; flex: none; accent-color: var(--ok); }
+
+/* ---------- 얻는 방법 ---------- */
+.how { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.how-item { padding: 10px 12px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; }
+
+/* ---------- 확률 막대 ---------- */
+.bar { display: inline-block; vertical-align: middle; width: 56px; height: 6px; margin-right: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); }
+
+/* ---------- 제작 계획 ---------- */
+#view-plan { display: flex; flex-direction: column; gap: 16px; }
+.summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.tile { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+.tile-label { color: var(--muted); font-size: 13px; }
+.tile-value { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.progress { height: 6px; margin-top: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--ok); }
+
+.roadmap { display: flex; align-items: stretch; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.stage { flex: 1 0 200px; display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--panel-2); border-radius: 8px; }
+.stage-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.stage-no { color: var(--accent); font-weight: 700; }
+.step { padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
+.stage-arrow { flex: none; align-self: center; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 10px solid var(--line); }
+
+.res-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
+.res-tile { display: flex; gap: 8px; align-items: flex-start; padding: 10px; background: var(--panel-2); border: 1px solid var(--line); border-left: 3px solid var(--k-farm); border-radius: 6px; }
+.res-qty { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.farm-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+.farm-item { padding: 10px 12px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; }
+.farm-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.farm-src { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px; align-items: center; font-size: 13px; padding: 2px 0; }
+.farm-src .num { font-variant-numeric: tabular-nums; color: var(--muted); }
+
+@media (max-width: 860px) {
+  .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .roadmap { flex-direction: column; overflow: visible; }
+  .stage { flex: none; }
+  .stage-arrow { border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid var(--line); border-bottom: 0; }
+  .tree ul { padding-left: 16px; }
+  .tree ul > li::before, .tree ul > li::after { left: -10px; }
+  .tree ul > li::after { width: 8px; }
+}
+.step .qty { margin-left: 6px; }
