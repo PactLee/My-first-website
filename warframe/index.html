@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>워프레임 도우미</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="#/">워프레임 도우미</a>
+    <nav class="tabs">
+      <a href="#/" data-tab="search">검색</a>
+      <a href="#/plan" data-tab="plan">제작 계획 <span id="plan-count" class="badge" hidden></span></a>
+      <a href="#/guide" data-tab="guide">파밍 가이드</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="view-search" class="view">
+      <div class="searchbar">
+        <input id="q" type="search" placeholder="이름으로 검색 (한국어 / English) — 예: 볼트 프라임, 오로킨 셀, Serration" autocomplete="off" autofocus>
+        <label class="chk"><input type="checkbox" id="f-prime"> 프라임만</label>
+        <label class="chk"><input type="checkbox" id="f-avail"> 볼트 제외</label>
+      </div>
+      <div id="cats" class="cats"></div>
+      <div class="layout">
+        <div class="results">
+          <div id="result-info" class="muted"></div>
+          <ul id="results"></ul>
+        </div>
+        <article id="detail" class="detail">
+          <p class="muted">왼쪽 목록에서 항목을 선택하면 제작 방법과 파밍 위치가 여기에 표시됩니다.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="view-plan" class="view" hidden></section>
+    <section id="view-guide" class="view" hidden></section>
+  </main>
+
+  <footer class="foot muted">
+    데이터: <a href="https://github.com/WFCD/warframe-items" target="_blank" rel="noopener">WFCD warframe-items</a>,
+    <a href="https://github.com/calamity-inc/warframe-public-export-plus" target="_blank" rel="noopener">Public Export Plus</a>
+    (<span id="data-version"></span>) · 공식 한국어 명칭 우선, 공식 번역이 없으면 영어 명칭 표기 ·
+    참고: <a href="https://wiki.warframe.com/" target="_blank" rel="noopener">Warframe 공식 위키</a>,
+    <a href="https://warframe.fandom.com/wiki/WARFRAME_Wiki" target="_blank" rel="noopener">Warframe 팬덤 위키</a> ·
+    Warframe은 Digital Extremes의 상표이며 이 도우미는 비공식 팬 제작물입니다.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
