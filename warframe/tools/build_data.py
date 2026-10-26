@@ -255,6 +255,39 @@ pep_upper = {}
 for en, k in pep_text.items():
     pep_upper.setdefault(en.upper(), k)
 
+# 공식 문구에서 확인한 장소·용어 (나이트웨이브·도전과제 문구 등)
+pep_text.setdefault("Derelict Vault", "오로킨 금고")
+pep_text.setdefault("Sorties", "출격")
+
+# 단어 단위 공식 번역: 같은 단어 수로 된 공식 이름 쌍에서 단어를 맞춰 보고,
+# 두 번 이상 같은 번역으로 나온 단어만 쓴다 (예: Bloodfrenzy → 블러드프렌지, Kubrow → 쿠브로우)
+_word_votes = defaultdict(lambda: defaultdict(int))
+for _en, _k in list(pep_text.items()) + list(ko_by_en.items()):
+    ew, kw = _en.split(), _k.split()
+    if len(ew) == len(kw) and 1 < len(ew) <= 4 and all(re.match(r"^[A-Za-z][A-Za-z'-]*$", w) for w in ew):
+        for a, b in zip(ew, kw):
+            if re.search(r"[가-힣]", b):
+                _word_votes[a][b] += 1
+WORD_KO = {}
+for _w, _votes in _word_votes.items():
+    best, n = max(_votes.items(), key=lambda x: x[1])
+    if n >= 2 and n >= 0.8 * sum(_votes.values()):
+        WORD_KO[_w] = best
+
+
+def tr_words(text):
+    """모든 단어에 확실한 공식 번역이 있을 때만 단어 단위로 번역한다."""
+    words = text.split()
+    if len(words) == 1:
+        return WORD_KO.get(text)
+    out = []
+    for w in words:
+        k = WORD_KO.get(w) or ko_by_en.get(w) or pep_text.get(w)
+        if not k:
+            return None
+        out.append(k)
+    return " ".join(out)
+
 
 # ---------------------------------------------------------------------------
 # 2) 성유물: 정제 단계별 4개 항목을 하나로 합침
@@ -336,7 +369,7 @@ def tr_location(loc):
 
 
 def tr_word(text):
-    return en2ko.get(text) or pep_text.get(text) or pep_upper.get(text.upper()) or text
+    return en2ko.get(text) or pep_text.get(text) or pep_upper.get(text.upper()) or tr_words(text) or text
 
 
 def tr_segment(seg):
